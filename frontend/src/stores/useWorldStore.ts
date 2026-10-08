@@ -56,7 +56,7 @@ export const useWorldStore = create<WorldState>((set) => ({
   worldId: null,
   status: 'idle',
   viewMode: 'complete',
-  activePanel: null,
+  activePanel: 'reconstruction',
   selectedRegion: null,
   jobId: null,
   processingStage: '',

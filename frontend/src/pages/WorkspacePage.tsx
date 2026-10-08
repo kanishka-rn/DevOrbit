@@ -7,7 +7,7 @@ import { Panels } from '../panels/Panels';
 import { Eye, Target, AlertTriangle, Activity } from 'lucide-react';
 
 export const WorkspacePage = () => {
-  const { status, setStatus, jobId, processingStage, setProcessingStage, viewMode, setViewMode, setWorldId, worldId, setWorldData, researchMode, setResearchMode, resetDemo } = useWorldStore();
+  const { status, setStatus, jobId, processingStage, setProcessingStage, viewMode, setViewMode, setWorldId, worldId, setWorldData, researchMode, setResearchMode, resetDemo, activePanel } = useWorldStore();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -72,14 +72,43 @@ export const WorkspacePage = () => {
           </button>
         </div>
         
-        <div className="p-4 border-b border-neutral-800">
-          <h3 className="text-xs font-semibold tracking-widest text-neutral-500 mb-3">WORLD LAYERS</h3>
-          <div className="space-y-1">
-            <ViewModeButton active={viewMode === 'reality'} onClick={() => setViewMode('reality')} icon={<Eye size={14} />} label="RECONSTRUCTED" desc="Observed geometry only" />
-            <ViewModeButton active={viewMode === 'coverage'} onClick={() => setViewMode('coverage')} icon={<AlertTriangle size={14} />} label="UNSEEN REGIONS" desc="Highlight missing geometry" />
-            <ViewModeButton active={viewMode === 'complete'} onClick={() => setViewMode('complete')} icon={<Target size={14} />} label="COMPLETE WORLD" desc="Observed + Generated" />
+        {activePanel === 'reconstruction' && (
+          <div className="p-4 border-b border-neutral-800">
+            <h3 className="text-xs font-semibold tracking-widest text-neutral-500 mb-3">RECONSTRUCTION</h3>
+            <div className="space-y-1">
+              <ViewModeButton active={viewMode === 'reality'} onClick={() => setViewMode('reality')} icon={<Eye size={14} />} label="RECONSTRUCTED" desc="Observed geometry only" />
+            </div>
           </div>
-        </div>
+        )}
+
+        {activePanel === 'completion' && (
+          <div className="p-4 border-b border-neutral-800">
+            <h3 className="text-xs font-semibold tracking-widest text-neutral-500 mb-3">COMPLETION</h3>
+            <div className="space-y-1">
+              <ViewModeButton active={viewMode === 'coverage'} onClick={() => setViewMode('coverage')} icon={<AlertTriangle size={14} />} label="UNSEEN REGIONS" desc="Highlight missing geometry" />
+              <ViewModeButton active={viewMode === 'complete'} onClick={() => setViewMode('complete')} icon={<Target size={14} />} label="COMPLETE WORLD" desc="Observed + Generated" />
+            </div>
+          </div>
+        )}
+
+        {activePanel === 'appearance' && (
+          <div className="p-4 border-b border-neutral-800">
+            <h3 className="text-xs font-semibold tracking-widest text-neutral-500 mb-3">APPEARANCE</h3>
+            <div className="text-xs text-neutral-400 p-2 bg-neutral-900 rounded">
+              <p className="font-bold text-neutral-300 mb-1">Scene Appearance Information</p>
+              <p>Advanced appearance editing coming in future scope.</p>
+            </div>
+          </div>
+        )}
+
+        {activePanel === 'export' && (
+          <div className="p-4 border-b border-neutral-800">
+            <h3 className="text-xs font-semibold tracking-widest text-neutral-500 mb-3">EXPORT SCENE</h3>
+            <div className="text-xs text-neutral-400 p-2 bg-neutral-900 rounded">
+              <p className="mb-1">Export panel opened on the right.</p>
+            </div>
+          </div>
+        )}
         
         {researchMode && (
           <div className="p-4 border-b border-neutral-800">

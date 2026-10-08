@@ -24,13 +24,13 @@ export const AppLayout = () => {
               icon={<Layers size={16} />} 
               label="Reconstruction" 
               active={activePanel === 'reconstruction'} 
-              onClick={() => setActivePanel('reconstruction')} 
+              onClick={() => { setActivePanel('reconstruction'); useWorldStore.getState().setViewMode('reality'); }} 
             />
             <NavButton 
               icon={<Wand2 size={16} />} 
               label="Completion" 
               active={activePanel === 'completion'} 
-              onClick={() => setActivePanel('completion')} 
+              onClick={() => { setActivePanel('completion'); useWorldStore.getState().setViewMode('complete'); }} 
             />
             <NavButton 
               icon={<Settings size={16} />} 
