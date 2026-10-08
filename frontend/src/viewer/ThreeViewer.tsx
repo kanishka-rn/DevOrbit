@@ -5,7 +5,7 @@ import { Suspense, useState } from 'react';
 import * as THREE from 'three';
 
 const DynamicScene = () => {
-  const { viewMode, setSelectedRegion, sceneNodes } = useWorldStore();
+  const { viewMode, selectedRegion, setSelectedRegion, sceneNodes } = useWorldStore();
   const [hoveredRegion, setHoveredRegion] = useState<any>(null);
 
   const handlePointerDown = (e: any, region: string) => {
@@ -14,44 +14,58 @@ const DynamicScene = () => {
   };
 
   const getMaterial = (node: any) => {
+    const isSelected = selectedRegion === node.id || selectedRegion === node.parentId;
     const regionType = node.status;
     const baseColor = node.material?.color || '#333';
     
+    let mat;
+    
     if (viewMode === 'uncertainty') { // Evidence View
-      if (regionType === 'observed') return new THREE.MeshStandardMaterial({ color: '#22c55e' }); // green
-      if (regionType === 'inferred') return new THREE.MeshStandardMaterial({ color: '#eab308' }); // yellow
-      if (regionType === 'generated') return new THREE.MeshStandardMaterial({ color: '#f97316' }); // orange
+      if (regionType === 'observed') mat = new THREE.MeshStandardMaterial({ color: '#22c55e' }); // green
+      else if (regionType === 'inferred') mat = new THREE.MeshStandardMaterial({ color: '#eab308' }); // yellow
+      else if (regionType === 'generated') mat = new THREE.MeshStandardMaterial({ color: '#f97316' }); // orange
+      else mat = new THREE.MeshStandardMaterial({ color: baseColor });
     }
     
-    if (viewMode === 'coverage') { // Unseen Regions
-      if (regionType === 'observed') return new THREE.MeshStandardMaterial({ color: '#111827', transparent: true, opacity: 0.3 }); // dark/ghosted
-      if (regionType === 'inferred') return new THREE.MeshStandardMaterial({ color: '#6366f1' }); // indigo
-      if (regionType === 'generated') return new THREE.MeshStandardMaterial({ color: '#f43f5e', emissive: '#f43f5e', emissiveIntensity: 0.5 }); // bright rose
+    else if (viewMode === 'coverage') { // Unseen Regions
+      if (regionType === 'observed') mat = new THREE.MeshStandardMaterial({ color: '#111827', transparent: true, opacity: 0.3 }); // dark/ghosted
+      else if (regionType === 'inferred') mat = new THREE.MeshStandardMaterial({ color: '#6366f1' }); // indigo
+      else if (regionType === 'generated') mat = new THREE.MeshStandardMaterial({ color: '#f43f5e', emissive: '#f43f5e', emissiveIntensity: 0.5 }); // bright rose
+      else mat = new THREE.MeshStandardMaterial({ color: baseColor });
     }
 
-    if (viewMode === 'difference') {
+    else if (viewMode === 'difference') {
       const diffMeta = useWorldStore.getState().worldValidation?.difference?.find((d: any) => d.region_id === node.id);
       const stat = diffMeta ? diffMeta.status : (regionType === 'generated' ? 'misaligned' : 'correct');
       
-      if (stat === 'misaligned') return new THREE.MeshStandardMaterial({ color: '#f59e0b', emissive: '#f59e0b', emissiveIntensity: 0.2 }); // Amber
-      if (stat === 'extra') return new THREE.MeshStandardMaterial({ color: '#ef4444', emissive: '#ef4444', emissiveIntensity: 0.2, wireframe: true }); // Red error
-      if (stat === 'correct') return new THREE.MeshStandardMaterial({ color: '#22c55e', transparent: true, opacity: 0.2 }); // Green ghost
-      return new THREE.MeshStandardMaterial({ color: '#111827', transparent: true, opacity: 0.1 }); 
+      if (stat === 'misaligned') mat = new THREE.MeshStandardMaterial({ color: '#f59e0b', emissive: '#f59e0b', emissiveIntensity: 0.2 }); // Amber
+      else if (stat === 'extra') mat = new THREE.MeshStandardMaterial({ color: '#ef4444', emissive: '#ef4444', emissiveIntensity: 0.2, wireframe: true }); // Red error
+      else if (stat === 'correct') mat = new THREE.MeshStandardMaterial({ color: '#22c55e', transparent: true, opacity: 0.2 }); // Green ghost
+      else mat = new THREE.MeshStandardMaterial({ color: '#111827', transparent: true, opacity: 0.1 }); 
     }
 
-    if (viewMode === 'reality' && (regionType === 'inferred' || regionType === 'generated' || regionType === 'unobserved')) {
-      return new THREE.MeshBasicMaterial({ visible: false });
+    else if (viewMode === 'reality' && (regionType === 'inferred' || regionType === 'generated' || regionType === 'unobserved')) {
+      mat = new THREE.MeshBasicMaterial({ visible: false });
     }
     
-    if (viewMode === 'inferred' && regionType === 'generated') {
-      return new THREE.MeshBasicMaterial({ visible: false });
+    else if (viewMode === 'inferred' && regionType === 'generated') {
+      mat = new THREE.MeshBasicMaterial({ visible: false });
     }
 
-    if (regionType === 'generated' && viewMode === 'complete') {
-       return new THREE.MeshStandardMaterial({ color: baseColor });
+    else if (regionType === 'generated' && viewMode === 'complete') {
+       mat = new THREE.MeshStandardMaterial({ color: baseColor });
     }
 
-    return new THREE.MeshStandardMaterial({ color: baseColor });
+    else {
+      mat = new THREE.MeshStandardMaterial({ color: baseColor });
+    }
+    
+    if (isSelected && mat.visible !== false) {
+      (mat as any).emissive = new THREE.Color('#3b82f6');
+      (mat as any).emissiveIntensity = 0.5;
+    }
+    
+    return mat;
   };
 
   return (

@@ -25,6 +25,7 @@ class GroundTruthEvaluator:
         self.gt_nodes_by_id = {n["id"]: n for n in self.gt["nodes"]}
 
     def apply_noise(self, nodes, noise_params):
+        random.seed(42) # Ensure deterministic noise for demo
         noisy_nodes = []
         geo_noise = noise_params.get("geometry_noise", 0.0)
         camera_noise = noise_params.get("camera_noise", 0.0)

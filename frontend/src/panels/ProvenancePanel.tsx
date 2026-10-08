@@ -25,12 +25,25 @@ export const ProvenancePanel = () => {
       <div className="p-4 space-y-6 flex-1 overflow-y-auto">
         <div>
           <div className="text-[10px] font-semibold text-neutral-500 tracking-widest mb-2">SOURCE</div>
-          <div className="flex items-center gap-2">
-            <span className={`px-2 py-1 text-xs font-bold rounded ${isGenerated ? 'bg-amber-500/20 text-amber-500' : 'bg-emerald-500/20 text-emerald-500'}`}>
-              {node.status.toUpperCase()}
-            </span>
-            <span className="text-xs text-neutral-400 font-mono">{Math.round(node.confidence * 100)}% CONFIDENCE</span>
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <span className={`px-2 py-1 text-xs font-bold rounded ${isGenerated ? 'bg-amber-500/20 text-amber-500' : 'bg-emerald-500/20 text-emerald-500'}`}>
+                {node.status.toUpperCase()}
+              </span>
+              <span className="text-xs text-neutral-400 font-mono">{Math.round(node.confidence * 100)}% CONFIDENCE</span>
+            </div>
+            <div className="text-[10px] text-neutral-600 uppercase tracking-widest">Prediction-time estimate</div>
           </div>
+          
+          {(isGenerated && node.confidence < 0.5) && (
+             <div className="mt-3 p-2 bg-rose-500/10 border border-rose-500/30 rounded flex items-start gap-2">
+               <ShieldAlert className="w-4 h-4 text-rose-500 shrink-0" />
+               <div>
+                 <div className="text-xs font-bold text-rose-500">⚠ LOW-CONFIDENCE GENERATED</div>
+                 <div className="text-[10px] text-rose-400/80 mt-1">Insufficient visual evidence and missing structural anchors.</div>
+               </div>
+             </div>
+          )}
         </div>
 
         <div>
@@ -87,6 +100,7 @@ export const ProvenancePanel = () => {
                 
                 {diffMeta && (
                   <div className="mt-4 p-3 bg-indigo-950/30 border border-indigo-900 rounded flex flex-col gap-2">
+                    <div className="text-[10px] text-indigo-500/80 uppercase tracking-widest mb-1 border-b border-indigo-900/50 pb-1">Post-hoc evaluation</div>
                     <div className="flex justify-between items-center">
                       <span className="text-indigo-400 text-[10px] font-bold uppercase tracking-wider">Ground-Truth Match</span>
                       <span className="text-indigo-300 font-mono font-bold text-sm">{Math.round(diffMeta.overlap * 100)}%</span>

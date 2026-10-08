@@ -36,6 +36,7 @@ interface WorldState {
   worldCoverage: any;
   worldValidation: any;
   versions: string[];
+  researchMode: boolean;
   
   setWorldId: (id: string | null) => void;
   setStatus: (status: 'idle' | 'uploading' | 'processing' | 'ready') => void;
@@ -47,6 +48,8 @@ interface WorldState {
   setSceneNodes: (nodes: SceneNode[]) => void;
   setWorldValidation: (evalData: any) => void;
   setWorldData: (data: any) => void;
+  setResearchMode: (mode: boolean) => void;
+  resetDemo: () => void;
 }
 
 export const useWorldStore = create<WorldState>((set) => ({
@@ -63,6 +66,7 @@ export const useWorldStore = create<WorldState>((set) => ({
   worldCoverage: null,
   worldValidation: null,
   versions: [],
+  researchMode: true,
   
   setWorldId: (id) => set({ worldId: id }),
   setStatus: (status) => set({ status }),
@@ -80,5 +84,21 @@ export const useWorldStore = create<WorldState>((set) => ({
     worldCoverage: data.coverage || null,
     worldValidation: data.validation || null,
     versions: data.versions || []
+  }),
+  setResearchMode: (mode) => set({ researchMode: mode }),
+  resetDemo: () => set({
+    worldId: null,
+    status: 'idle',
+    viewMode: 'complete',
+    activePanel: null,
+    selectedRegion: null,
+    jobId: null,
+    processingStage: '',
+    sceneNodes: [],
+    sceneGraph: null,
+    worldMetrics: null,
+    worldCoverage: null,
+    worldValidation: null,
+    researchMode: true
   })
-}))
+}));

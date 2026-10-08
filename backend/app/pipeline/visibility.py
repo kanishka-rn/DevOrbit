@@ -4,6 +4,7 @@ REGION_RESOLUTION = 10
 
 class VisibilityMapper:
     def _generate_regions(self, parent_id, base_score):
+        random.seed(42) # Ensure deterministic regions for demo
         regions = []
         for u in range(REGION_RESOLUTION):
             for v in range(REGION_RESOLUTION):

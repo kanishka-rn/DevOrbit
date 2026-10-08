@@ -41,7 +41,32 @@ async def run_evaluation(world_id: str, scenario: str = "hidden_back_wall"):
     world["evaluation"] = report
     return {"status": "success", "report": report}
 
-@router.get("/{world_id}")
+@router.post("/robustness/{world_id}")
+async def run_robustness(world_id: str):
+    world = await get_world(world_id)
+    evaluator = GroundTruthEvaluator(scenario_name="noisy_observation")
+    completer = SceneCompleter()
+    
+    base_nodes = [n for n in world["nodes"] if n.get("status") != "generated"]
+    
+    levels = [0.0, 0.02, 0.05, 0.10]
+    results = []
+    
+    for level in levels:
+        noise_profile = {"geometry_noise": level, "camera_noise": level, "depth_noise": level, "missing_observation_ratio": level * 2}
+        noisy_base = evaluator.apply_noise(base_nodes, noise_profile)
+        
+        full_nodes = completer.complete(list(noisy_base), mode="full")
+        rep = evaluator.evaluate(full_nodes)
+        
+        results.append({
+            "noise_level": level,
+            "completion_iou": rep["completion"]["iou"],
+            "geometric_error": rep["completion"]["geometric_error"],
+            "scene_completeness": rep["overall"]["completeness"]
+        })
+        
+    return {"status": "success", "results": results}
 async def get_evaluation(world_id: str):
     world = await get_world(world_id)
     return world.get("evaluation", None)
