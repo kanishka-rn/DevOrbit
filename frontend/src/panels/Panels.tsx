@@ -2,6 +2,7 @@ import { useWorldStore } from '../stores/useWorldStore';
 import { ProvenancePanel } from './ProvenancePanel';
 import { AppearancePanel } from './AppearancePanel';
 import { MetricsPanel } from './MetricsPanel';
+import { CompletionPanel } from './CompletionPanel';
 
 export const Panels = () => {
   const { activePanel, selectedRegion } = useWorldStore();
@@ -12,10 +13,11 @@ export const Panels = () => {
     <div className="w-80 border-l border-neutral-800 bg-neutral-950/90 z-10 shrink-0 flex flex-col">
       {activePanel === 'appearance' && <AppearancePanel />}
       {activePanel === 'evaluation' && <MetricsPanel />}
+      {activePanel === 'completion' && <CompletionPanel />}
       {selectedRegion && !activePanel && <ProvenancePanel />}
       {!selectedRegion && activePanel === 'reconstruction' && (
         <div className="p-4">
-          <h2 className="text-sm font-bold text-neutral-200 mb-4">RECONSTRUCTION PIPELINE</h2>
+          <h2 className="text-sm font-bold text-neutral-200 mb-4 uppercase">Reconstruction Pipeline</h2>
           <ul className="space-y-3 text-xs text-neutral-400">
             <li className="flex items-center gap-2"><span className="text-emerald-500">✓</span> Input analyzed</li>
             <li className="flex items-center gap-2"><span className="text-emerald-500">✓</span> Frames extracted</li>
