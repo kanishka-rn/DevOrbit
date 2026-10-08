@@ -1,169 +1,274 @@
-# SpaceMind — Final Presentation
+# SPACEMIND
 
----
-
-## Slide 1 — Title
-**SPACEMIND**
-Evidence-Aware 3D Scene Reconstruction and Completion
+**Evidence-Aware 3D Scene Reconstruction and Completion**
 From Blueprints and Room Video to Navigable 3D Spaces
 
 *Team: World Forge AI (DevOrbit)*
 *Hackathon: HNX26EPS06*
 
----
+> **“SpaceMind knows what it knows.”**
 
-## Slide 2 — The Problem
-Current 3D reconstruction systems struggle when:
-- Parts of a room are not visible
-- Camera footage is incomplete
-- Objects occlude surfaces
-- Geometry must be inferred
-- Generated geometry may appear visually plausible but lack evidence
-
-**Core problem:**
-> How can a system reconstruct an incomplete environment without pretending that unseen geometry was actually observed?
+*(Visual: Strong screenshot of the final 3D workspace showing Reconstructed + Inferred regions)*
 
 ---
 
-## Slide 3 — Human Problem / Real-World Impact
-**Use Cases:**
-- Real Estate & Renovation
-- Construction & Remote Inspection
-- Robotics & Disaster Response
-- Accessibility & Digital Twins
+# THE PROBLEM
 
-A person often cannot physically inspect every part of a space.
-**SpaceMind provides:**
-3D reconstruction + unseen-region completion + evidence transparency.
+A room video or blueprint does not always provide complete visual evidence.
 
----
+Problems include:
+- Occluded surfaces
+- Unseen walls
+- Hidden corners
+- Incomplete camera coverage
+- Noisy observations
+- Uncertain geometry
 
-## Slide 4 — Our Solution
-**Pipeline:**
-Blueprint / Video
-       ↓
-3D Reconstruction
-       ↓
-Visibility Analysis
-       ↓
-Unseen Region Detection
-       ↓
-Evidence-Aware Completion
-       ↓
-Provenance
-       ↓
-Navigable 3D Scene
+> A visually plausible 3D scene is not necessarily a trustworthy reconstruction.
 
-**Highlighting:** OBSERVED, INFERRED, GENERATED
+**How can we reconstruct what is missing without pretending that unseen geometry was actually observed?**
+
+*(Visual Concept)*
+```
+Camera
+  ↓
+[ Sofa ]
+████████████
+Hidden Wall
+????????????
+```
 
 ---
 
-## Slide 5 — What Makes SpaceMind Different
-| Feature | Traditional | SpaceMind |
-| :--- | :--- | :--- |
-| 3D Reconstruction | ✓ | ✓ |
-| Unseen Completion | Sometimes | ✓ |
-| Visibility Reasoning | Limited | ✓ |
-| Structural Constraints | Limited | ✓ |
-| Region-level Evidence | Limited | ✓ |
-| Provenance | Rare | ✓ |
-| Confidence | Rare | ✓ |
-| Ground Truth Evaluation | External | Built-in |
-| Ablation | Rare | ✓ |
-| Failure Transparency | Limited | ✓ |
+# WHY DOES THIS MATTER?
+
+Users often cannot physically inspect every part of an environment.
+
+- REAL ESTATE
+- RENOVATION
+- CONSTRUCTION
+- REMOTE INSPECTION
+- ROBOTICS
+- DISASTER RESPONSE
+- ACCESSIBILITY
+- DIGITAL TWINS
+
+**SpaceMind helps create:**
+Navigable 3D representation
++ Unseen-region completion
++ Evidence transparency
 
 ---
 
-## Slide 6 — Research Architecture
-*(See README.md for Mermaid Architecture Diagram)*
-**Highlighting:**
-Visibility Mapping → Unobserved Region Detection → Structural Completion → Provenance.
-*Ground truth does NOT enter the reconstruction pipeline. It appears only for post-hoc evaluation.*
+# THE SPACEMIND APPROACH
+
+BLUEPRINT / VIDEO
+       ↓
+3D RECONSTRUCTION
+       ↓
+VISIBILITY ANALYSIS
+       ↓
+UNSEEN REGION DETECTION
+       ↓
+STRUCTURAL COMPLETION
+       ↓
+PROVENANCE + CONFIDENCE
+       ↓
+NAVIGABLE 3D SCENE
+
+*(Highlighting)*
+OBSERVED | INFERRED | GENERATED
+
+> SpaceMind does not treat every part of the final scene as equally certain.
 
 ---
 
-## Slide 7 — Evidence-Aware Representation
-**A wall divided into regions (10x10):**
+# FROM 3D RECONSTRUCTION TO EVIDENCE-AWARE RECONSTRUCTION
+
+| Capability | Conventional Reconstruction | SpaceMind |
+|---|---|---|
+| 3D reconstruction | ✓ | ✓ |
+| Unseen-region completion | Limited | ✓ |
+| Visibility reasoning | Limited | ✓ |
+| Structural constraints | Limited | ✓ |
+| Region-level evidence | Limited | ✓ |
+| Provenance | Limited | ✓ |
+| Confidence | Limited | ✓ |
+| Ground-truth evaluation | External | Integrated |
+| Ablation | — | ✓ |
+| Failure transparency | Limited | ✓ |
+
+---
+
+# SYSTEM ARCHITECTURE
+
+```
+                    INPUT
+                      │
+             ┌────────┴────────┐
+             │                 │
+        BLUEPRINT            VIDEO
+             │                 │
+             ▼                 ▼
+     Blueprint Parser    Frame Extraction
+             │                 │
+             ▼                 ▼
+     Structural Prior    Camera Estimation
+             │                 │
+             │                 ▼
+             │           Depth Estimation
+             │                 │
+             └────────┬────────┘
+                      ▼
+               SCENE ALIGNMENT
+                      │
+                      ▼
+              VISIBILITY MAPPING
+                      │
+                      ▼
+         UNOBSERVED REGION DETECTION
+                      │
+                      ▼
+          STRUCTURAL COMPLETION
+                      │
+                      ▼
+          PROVENANCE + CONFIDENCE
+                      │
+                      ▼
+             NAVIGABLE 3D SCENE
+                      │
+                 ┌────┴────┐
+                 ▼         ▼
+             EVALUATION   EXPORT
+```
+*(Ground truth appears only on the evaluation branch.)*
+
+---
+
+# THE CORE IDEA: EVERY REGION HAS EVIDENCE
+
+```
+┌────┬────┬────┬────┬────┐
+│ O  │ O  │ O  │ U  │ U  │
+├────┼────┼────┼────┼────┤
+│ O  │ O  │ P  │ U  │ U  │
+├────┼────┼────┼────┼────┤
+│ O  │ P  │ G  │ G  │ U  │
+└────┴────┴────┴────┴────┘
 O = Observed, P = Partially Observed, U = Unobserved, G = Generated
+```
 
-Each region tracks:
-- Visibility Score
+For each region:
+- Visibility
 - Observation Count
-- Supporting Evidence
+- Evidence Frames
+- Supporting Elements
 - Confidence
 - Completion Reason
 
 ---
 
-## Slide 8 — Evaluation
-**GROUND TRUTH → PREDICTION → DIFFERENCE**
+# HOW DO WE KNOW THE COMPLETION IS CORRECT?
 
-**Metrics:**
+```
+GROUND TRUTH
+      │
+      ├──→ Observation Generator
+      │
+      │     ↓
+      │   SpaceMind
+      │     ↓
+      │   Prediction
+      │
+      └──────────────→ Evaluator
+                         ↓
+                    Comparison
+```
+
+> Ground truth is withheld from the reconstruction pipeline.
+
+Metrics:
 - Completion IoU
 - Mean Geometric Error
 - Surface Coverage
 - Scene Completeness
 
-*Ground truth is accessed **only after prediction**. This guarantees research credibility.*
+**Prediction Confidence ≠ Ground-Truth Similarity**
 
 ---
 
-## Slide 9 — Ablation
-**Controlled Synthetic Benchmark Results (Hidden Back Wall):**
-| Method | IoU | Error |
-| :--- | :--- | :--- |
-| Geometry Only | ≈ 0.40 | ≈ 0.45m |
-| Structural Constraints | ≈ 0.70 | ≈ 0.25m |
-| Full SpaceMind | 1.00 | 0.000m |
+# DO STRUCTURAL CONSTRAINTS ACTUALLY HELP?
 
-*(These measured results prove structural constraints improve geometric alignment over naive bounding box continuation.)*
+*(Controlled synthetic benchmark)*
 
----
+| Method | IoU | Mean Error |
+|---|---:|---:|
+| Geometry Only | ~0.40 | ~0.450 m |
+| Structural Constraints | ~0.70 | ~0.250 m |
+| Full SpaceMind | ~1.00 | ~0.000 m |
 
-## Slide 10 — Robustness
-**Noise vs Quality Degradation:**
-| Noise | Completion IoU |
-| :--- | :--- |
-| 0% | ≈ 1.00 |
-| 2% | ≈ 0.96 |
-| 5% | ≈ 0.91 |
-| 10% | ≈ 0.84 |
-
-> As observation quality decreases, reconstruction quality degrades measurably rather than silently pretending certainty.
+> On the controlled hidden-wall benchmark, the full procedural constraint system achieved perfect overlap. This result should not be interpreted as universal reconstruction accuracy.
 
 ---
 
-## Slide 11 — Failure Transparency
-**Low-Evidence Case (Missing 40% Observations):**
+# WHAT HAPPENS WHEN OBSERVATIONS GET WORSE?
+
+*(Controlled benchmark robustness experiment)*
+
+| Observation Noise | Completion IoU |
+|---:|---:|
+| 0% | ~1.00 |
+| 2% | ~0.96 |
+| 5% | ~0.91 |
+| 10% | ~0.84 |
+
+> SpaceMind degrades measurably as observation quality decreases instead of silently treating noisy geometry as certain.
+
+---
+
+# WHEN THE EVIDENCE IS WEAK
 
 ⚠ **LOW-CONFIDENCE GENERATED**
-- Evidence Strength: LOW
-- Visibility: 18%
-- Observation Count: 2
-- Prediction Confidence: 41%
 
-*Reason:* Insufficient visual evidence and missing structural anchors.
-> **A good reconstruction system should know when it is uncertain.**
+**Evidence Strength:** LOW
+**Visibility:** 18%
+**Observation Count:** 2
+**Prediction Confidence:** 41%
+
+**Reason:** Insufficient visual evidence and missing structural anchors.
+
+> **A trustworthy reconstruction system should know when it is uncertain.**
 
 ---
 
-## Slide 12 — Future Scope
-- Neural depth / camera estimation models
-- More realistic non-planar surfaces (furniture)
-- Larger indoor benchmarks and multi-room
-- Learned completion models (Diffusion bounds)
+# FROM DEMO TO REAL-WORLD SYSTEM
+
+**Demo Flow:**
+VIDEO → RECONSTRUCTED → UNSEEN REGIONS → COMPLETE WORLD → PROVENANCE → BENCHMARK → DIFFERENCE → ABLATION
+
+**FUTURE SCOPE:**
+- Stronger learned camera/depth models
+- Learned completion models
+- Larger real-world indoor datasets
+- Non-planar surface reasoning
+- Blueprint-guided video reconstruction
 - Sparse photo reconstruction
-- Digital twins and Robotics integrations
-
-*(SpaceMind's architecture supports all of these by treating the neural components as modular adapters.)*
+- Object-level scene understanding
+- Robotics / digital-twin integration
 
 ---
 
-## Slide 13 — Final Slide
-**SPACEMIND**
-Reconstruct what you can see.
-Infer what the structure supports.
-Generate what is missing.
-And show the difference.
+# SPACEMIND
 
-> **“SpaceMind knows what it knows.”**
+> **Reconstruct what you can see.**
+>
+> **Infer what the structure supports.**
+>
+> **Generate what is missing.**
+>
+> **And show the difference.**
+
+**“SpaceMind knows what it knows.”**
+
+Thank You
+Questions?
