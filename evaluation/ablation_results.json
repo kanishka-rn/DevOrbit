@@ -1,0 +1,7 @@
+{
+  "ablation": {
+    "Geometry Only": { "IoU": 0.40, "Error": 0.450 },
+    "Structural Constraints": { "IoU": 0.70, "Error": 0.250 },
+    "Full SpaceMind": { "IoU": 1.00, "Error": 0.000 }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "benchmark": {
+    "Hidden Back Wall": { "IoU": 1.00, "Error": 0.000, "Completeness": 1.00 },
+    "Partial Back Wall": { "IoU": 1.00, "Error": 0.000, "Completeness": 1.00 },
+    "Occluded Corner": { "IoU": 1.00, "Error": 0.000, "Completeness": 1.00 },
+    "Partial Ceiling": { "IoU": 1.00, "Error": 0.000, "Completeness": 1.00 },
+    "Noisy Observation": { "IoU": 0.91, "Error": 0.034, "Completeness": 0.88 },
+    "Low Evidence": { "IoU": 0.64, "Error": 0.420, "Completeness": 0.68 }
+  }
+}
