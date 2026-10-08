@@ -11,8 +11,8 @@ export const uploadVideo = async (file: File) => {
   return res.data;
 };
 
-export const startReconstruction = async (inputId: string) => {
-  const res = await apiClient.post(`/reconstruct?input_id=${inputId}`);
+export const startReconstruction = async (inputId: string, mode: string = 'video') => {
+  const res = await apiClient.post(`/reconstruct?input_id=${inputId}&mode=${mode}`);
   return res.data;
 };
 

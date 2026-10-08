@@ -12,25 +12,39 @@ jobs = {}
 OUTPUT_DIR = "data/outputs"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-async def process_reconstruction(job_id: str, input_id: str):
-    jobs[job_id] = {"status": "processing", "stage": "Input analyzed", "progress": 10, "message": "Analyzing video..."}
-    await asyncio.sleep(1)
-    jobs[job_id] = {"status": "processing", "stage": "Frames extracted", "progress": 20, "message": "Extracting frames..."}
-    await asyncio.sleep(1)
-    jobs[job_id] = {"status": "processing", "stage": "Keyframes selected", "progress": 30, "message": "Selecting keyframes..."}
-    await asyncio.sleep(1)
-    jobs[job_id] = {"status": "processing", "stage": "Camera estimated", "progress": 40, "message": "Estimating camera poses..."}
-    await asyncio.sleep(1)
-    jobs[job_id] = {"status": "processing", "stage": "Depth generated", "progress": 50, "message": "Generating depth maps..."}
-    await asyncio.sleep(1)
-    jobs[job_id] = {"status": "processing", "stage": "3D geometry built", "progress": 60, "message": "Building point cloud..."}
-    await asyncio.sleep(1)
-    jobs[job_id] = {"status": "processing", "stage": "Scene graph created", "progress": 70, "message": "Creating scene graph..."}
-    await asyncio.sleep(1)
-    jobs[job_id] = {"status": "processing", "stage": "Visibility analyzed", "progress": 80, "message": "Analyzing visibility..."}
-    await asyncio.sleep(1)
-    jobs[job_id] = {"status": "processing", "stage": "Missing regions detected", "progress": 90, "message": "Detecting missing regions..."}
-    await asyncio.sleep(1)
+async def process_reconstruction(job_id: str, input_id: str, mode: str = "video"):
+    if mode == "blueprint":
+        jobs[job_id] = {"status": "processing", "stage": "Parsing blueprint", "progress": 10, "message": "Analyzing architectural layout..."}
+        await asyncio.sleep(1)
+        jobs[job_id] = {"status": "processing", "stage": "Structural prior applied", "progress": 25, "message": "Extracting walls and constraints..."}
+        await asyncio.sleep(1)
+        jobs[job_id] = {"status": "processing", "stage": "Scene alignment", "progress": 40, "message": "Aligning metric space..."}
+        await asyncio.sleep(1)
+        jobs[job_id] = {"status": "processing", "stage": "Semantic layout", "progress": 55, "message": "Assigning semantics..."}
+        await asyncio.sleep(1)
+        jobs[job_id] = {"status": "processing", "stage": "3D geometry built", "progress": 70, "message": "Generating volumes..."}
+        await asyncio.sleep(1)
+        jobs[job_id] = {"status": "processing", "stage": "Visibility mapped", "progress": 85, "message": "Projecting visibility..."}
+        await asyncio.sleep(1)
+    else:
+        jobs[job_id] = {"status": "processing", "stage": "Input analyzed", "progress": 10, "message": "Analyzing video..."}
+        await asyncio.sleep(1)
+        jobs[job_id] = {"status": "processing", "stage": "Frames extracted", "progress": 20, "message": "Extracting frames..."}
+        await asyncio.sleep(1)
+        jobs[job_id] = {"status": "processing", "stage": "Keyframes selected", "progress": 30, "message": "Selecting keyframes..."}
+        await asyncio.sleep(1)
+        jobs[job_id] = {"status": "processing", "stage": "Camera estimated", "progress": 40, "message": "Estimating camera poses..."}
+        await asyncio.sleep(1)
+        jobs[job_id] = {"status": "processing", "stage": "Depth generated", "progress": 50, "message": "Generating depth maps..."}
+        await asyncio.sleep(1)
+        jobs[job_id] = {"status": "processing", "stage": "3D geometry built", "progress": 60, "message": "Building point cloud..."}
+        await asyncio.sleep(1)
+        jobs[job_id] = {"status": "processing", "stage": "Scene graph created", "progress": 70, "message": "Creating scene graph..."}
+        await asyncio.sleep(1)
+        jobs[job_id] = {"status": "processing", "stage": "Visibility analyzed", "progress": 80, "message": "Analyzing visibility..."}
+        await asyncio.sleep(1)
+        jobs[job_id] = {"status": "processing", "stage": "Missing regions detected", "progress": 90, "message": "Detecting missing regions..."}
+        await asyncio.sleep(1)
     
     world_id = str(uuid.uuid4())
     
@@ -132,10 +146,10 @@ async def process_reconstruction(job_id: str, input_id: str):
     jobs[job_id] = {"status": "completed", "stage": "Validation completed", "progress": 100, "message": "Reconstruction complete", "world_id": world_id}
 
 @router.post("")
-async def start_reconstruction(input_id: str, background_tasks: BackgroundTasks):
+async def start_reconstruction(input_id: str, background_tasks: BackgroundTasks, mode: str = "video"):
     job_id = str(uuid.uuid4())
     jobs[job_id] = {"status": "queued", "stage": "queued", "progress": 0, "message": "Job queued"}
-    background_tasks.add_task(process_reconstruction, job_id, input_id)
+    background_tasks.add_task(process_reconstruction, job_id, input_id, mode)
     return {"job_id": job_id}
 
 @router.get("/{job_id}")

@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UploadCloud, Video, AlertCircle, Loader2 } from 'lucide-react';
+import { UploadCloud, Video, FileImage, AlertCircle, Loader2 } from 'lucide-react';
 import { useWorldStore } from '../stores/useWorldStore';
 import { uploadVideo, startReconstruction } from '../api/client';
 
@@ -10,13 +10,14 @@ export const UploadPage = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [mode, setMode] = useState<'video' | 'blueprint'>('video');
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDemo = async () => {
     try {
       setStatus('processing');
-      const res = await startReconstruction("demo_input_id");
+      const res = await startReconstruction("demo_input_id", mode);
       setJobId(res.job_id);
       navigate('/workspace');
     } catch (err) {
@@ -27,19 +28,24 @@ export const UploadPage = () => {
 
   const validateAndProcessFile = async (file: File) => {
     setErrorMsg(null);
-    const validTypes = ['video/mp4', 'video/quicktime', 'video/webm', 'video/x-matroska'];
     
-    // Fallback checking by extension if MIME is missing
+    let validTypes = mode === 'video' 
+      ? ['video/mp4', 'video/quicktime', 'video/webm', 'video/x-matroska']
+      : ['image/jpeg', 'image/png', 'application/pdf'];
+      
+    let validExtensions = mode === 'video'
+      ? ['mp4', 'mov', 'webm', 'mkv', 'avi']
+      : ['jpg', 'jpeg', 'png', 'pdf'];
+      
     const extension = file.name.split('.').pop()?.toLowerCase();
-    const validExtensions = ['mp4', 'mov', 'webm', 'mkv', 'avi'];
     
     if (!validTypes.includes(file.type) && (!extension || !validExtensions.includes(extension))) {
-      setErrorMsg("INVALID_VIDEO: Unsupported format. Please upload MP4, MOV, or WEBM.");
+      setErrorMsg(`INVALID_FILE: Unsupported format. Please upload ${mode === 'video' ? 'MP4, MOV, or WEBM' : 'JPG, PNG, or PDF'}.`);
       return;
     }
 
     if (file.size > 500 * 1024 * 1024) {
-      setErrorMsg("FILE_TOO_LARGE: Video exceeds the 500MB limit.");
+      setErrorMsg("FILE_TOO_LARGE: Exceeds the 500MB limit.");
       return;
     }
 
@@ -47,7 +53,8 @@ export const UploadPage = () => {
       setIsUploading(true);
       const uploadRes = await uploadVideo(file);
       setStatus('processing');
-      const reconRes = await startReconstruction(uploadRes.input_id);
+      // Pass the mode along so backend could switch pipelines
+      const reconRes = await startReconstruction(uploadRes.input_id, mode);
       setJobId(reconRes.job_id);
       navigate('/workspace');
     } catch (err) {
@@ -75,13 +82,30 @@ export const UploadPage = () => {
   };
 
   return (
-    <div className="h-full w-full flex items-center justify-center bg-neutral-950 p-6">
-      <div className="max-w-2xl w-full flex flex-col gap-8 items-center">
+    <div className="h-full w-full flex items-center justify-center bg-neutral-950 p-6 overflow-y-auto">
+      <div className="max-w-2xl w-full flex flex-col gap-8 items-center py-10">
         <div className="text-center space-y-4">
           <h2 className="text-3xl font-light text-neutral-200 tracking-wide">Reconstruct the unseen.</h2>
           <p className="text-neutral-500 max-w-md mx-auto leading-relaxed">
-            Upload a room video. We reconstruct what was observed, infer what is hidden, and generate the missing regions with explicit provenance.
+            Upload an architectural blueprint or a room video. We reconstruct what was observed, infer what is hidden, and generate the missing regions with explicit provenance.
           </p>
+        </div>
+
+        <div className="flex gap-2 p-1 bg-neutral-900 rounded-lg w-full max-w-md">
+          <button 
+            onClick={() => { setMode('blueprint'); setErrorMsg(null); }}
+            className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors flex items-center justify-center gap-2 ${mode === 'blueprint' ? 'bg-neutral-800 text-neutral-200' : 'text-neutral-500 hover:text-neutral-300'}`}
+          >
+            <FileImage className="w-4 h-4" />
+            Mode A: Blueprint
+          </button>
+          <button 
+            onClick={() => { setMode('video'); setErrorMsg(null); }}
+            className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors flex items-center justify-center gap-2 ${mode === 'video' ? 'bg-neutral-800 text-neutral-200' : 'text-neutral-500 hover:text-neutral-300'}`}
+          >
+            <Video className="w-4 h-4" />
+            Mode B: Room Video
+          </button>
         </div>
 
         <div 
@@ -96,7 +120,7 @@ export const UploadPage = () => {
             type="file" 
             ref={fileInputRef} 
             className="hidden" 
-            accept="video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm"
+            accept={mode === 'video' ? "video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm" : "image/jpeg,image/png,application/pdf,.jpg,.png,.pdf"}
             onChange={handleFileChange}
           />
           
@@ -108,16 +132,18 @@ export const UploadPage = () => {
           ) : isDragging ? (
             <div className="flex flex-col items-center gap-3">
               <UploadCloud className="w-10 h-10 text-emerald-500 animate-bounce" />
-              <p className="text-sm font-bold text-emerald-400 uppercase tracking-widest">Drop video to upload</p>
+              <p className="text-sm font-bold text-emerald-400 uppercase tracking-widest">Drop {mode} to upload</p>
             </div>
           ) : (
             <>
               <div className="w-16 h-16 rounded-full bg-neutral-900 flex items-center justify-center">
-                <UploadCloud className="w-8 h-8 text-neutral-400" />
+                {mode === 'video' ? <Video className="w-8 h-8 text-neutral-400" /> : <FileImage className="w-8 h-8 text-neutral-400" />}
               </div>
               <div className="text-center">
-                <p className="text-sm font-medium text-neutral-300">Click or drag and drop room video</p>
-                <p className="text-xs text-neutral-600 mt-1">MP4, MOV, WEBM up to 500MB</p>
+                <p className="text-sm font-medium text-neutral-300">Click or drag and drop {mode}</p>
+                <p className="text-xs text-neutral-600 mt-1">
+                  {mode === 'video' ? 'MP4, MOV, WEBM up to 500MB' : 'JPG, PNG, PDF up to 50MB'}
+                </p>
               </div>
             </>
           )}
@@ -145,7 +171,7 @@ export const UploadPage = () => {
           className="flex items-center gap-2 px-6 py-3 rounded-md bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-sm font-medium text-neutral-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Video className="w-4 h-4 text-emerald-400" />
-          USE DEMO ROOM
+          TRY DEMO ROOM
         </button>
       </div>
     </div>

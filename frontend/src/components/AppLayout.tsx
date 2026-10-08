@@ -12,7 +12,7 @@ export const AppLayout = () => {
       <header className="h-14 border-b border-neutral-800 flex items-center justify-between px-6 shrink-0 bg-neutral-900/50 backdrop-blur-sm z-10">
         <div className="flex items-center gap-2">
           <Cuboid className="w-6 h-6 text-emerald-500" />
-          <h1 className="text-sm font-bold tracking-widest text-neutral-200">WORLD FORGE AI</h1>
+          <h1 className="text-sm font-bold tracking-widest text-neutral-200">SPACEMIND</h1>
         </div>
         
         {isWorkspace && (

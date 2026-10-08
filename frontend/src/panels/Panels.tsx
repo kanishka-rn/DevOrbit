@@ -4,6 +4,7 @@ import { AppearancePanel } from './AppearancePanel';
 import { MetricsPanel } from './MetricsPanel';
 import { CompletionPanel } from './CompletionPanel';
 import { SceneGraphPanel } from './SceneGraphPanel';
+import { ExportPanel } from './ExportPanel';
 
 export const Panels = () => {
   const { activePanel, selectedRegion } = useWorldStore();
@@ -16,6 +17,7 @@ export const Panels = () => {
       {activePanel === 'evaluation' && <MetricsPanel />}
       {activePanel === 'completion' && <CompletionPanel />}
       {activePanel === 'reconstruction' && <SceneGraphPanel />}
+      {activePanel === 'export' && <ExportPanel />}
       {selectedRegion && !activePanel && <ProvenancePanel />}
     </div>
   );
