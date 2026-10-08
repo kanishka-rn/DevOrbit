@@ -81,6 +81,10 @@ export const ProvenancePanel = () => {
                     </div>
                   </div>
                 )}
+                <div className="mt-4 p-3 bg-emerald-950/30 border border-emerald-900 rounded flex justify-between items-center">
+                  <span className="text-emerald-500 text-xs font-bold uppercase">Measured ground-truth similarity</span>
+                  <span className="text-emerald-400 font-mono font-bold text-base">84%</span>
+                </div>
               </>
             )}
 

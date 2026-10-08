@@ -1,0 +1,14 @@
+{
+  "scenario": "hidden_back_wall",
+  "description": "Camera faces front and sides, back wall is completely unobserved.",
+  "observed": [
+    "floor_01",
+    "wall_01",
+    "wall_02",
+    "sofa_01"
+  ],
+  "hidden": [
+    "wall_03",
+    "wall_04"
+  ]
+}

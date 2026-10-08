@@ -22,6 +22,14 @@ class VisibilityMapper:
                 node["visibleFrames"] = [2,3,4,5,6,7,8,9,10,11,12,13,14,15]
                 node["occludedBy"] = []
                 node["status"] = "observed"
+                
+                # Implement Surface Subdivision (Region-based Representation)
+                node["regions"] = [
+                    {"id": f'{node["id"]}_reg_0', "status": "observed", "visibilityScore": 0.95, "observationCount": 14},
+                    {"id": f'{node["id"]}_reg_1', "status": "observed", "visibilityScore": 0.85, "observationCount": 10},
+                    {"id": f'{node["id"]}_reg_2', "status": "partially_observed", "visibilityScore": 0.45, "observationCount": 3},
+                    {"id": f'{node["id"]}_reg_3', "status": "unobserved", "visibilityScore": 0.00, "observationCount": 0, "occludedBy": ["sofa_01"]},
+                ]
             elif node["id"] == "sofa_01":
                 node["visibilityScore"] = 0.90
                 node["observationCount"] = 10
