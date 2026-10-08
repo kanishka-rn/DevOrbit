@@ -16,16 +16,16 @@ const DynamicScene = () => {
     const regionType = node.status;
     const baseColor = node.material?.color || '#333';
     
-    if (viewMode === 'uncertainty') {
+    if (viewMode === 'uncertainty') { // Evidence View
       if (regionType === 'observed') return new THREE.MeshStandardMaterial({ color: '#22c55e' }); // green
       if (regionType === 'inferred') return new THREE.MeshStandardMaterial({ color: '#eab308' }); // yellow
       if (regionType === 'generated') return new THREE.MeshStandardMaterial({ color: '#f97316' }); // orange
     }
     
-    if (viewMode === 'coverage') {
-      if (regionType === 'observed') return new THREE.MeshStandardMaterial({ color: '#0ea5e9' }); // blue
+    if (viewMode === 'coverage') { // Unseen Regions
+      if (regionType === 'observed') return new THREE.MeshStandardMaterial({ color: '#111827', transparent: true, opacity: 0.3 }); // dark/ghosted
       if (regionType === 'inferred') return new THREE.MeshStandardMaterial({ color: '#6366f1' }); // indigo
-      if (regionType === 'generated') return new THREE.MeshStandardMaterial({ color: '#f43f5e' }); // rose
+      if (regionType === 'generated') return new THREE.MeshStandardMaterial({ color: '#f43f5e', emissive: '#f43f5e', emissiveIntensity: 0.5 }); // bright rose
     }
 
     if (viewMode === 'reality' && (regionType === 'inferred' || regionType === 'generated')) {

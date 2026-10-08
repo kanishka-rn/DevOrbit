@@ -3,7 +3,7 @@ import { useWorldStore } from '../stores/useWorldStore';
 import { getReconstructStatus, getWorld } from '../api/client';
 import { ThreeViewer } from '../viewer/ThreeViewer';
 import { Panels } from '../panels/Panels';
-import { Layers, Eye, Target, AlertTriangle, Activity } from 'lucide-react';
+import { Eye, Target, AlertTriangle, Activity } from 'lucide-react';
 
 export const WorkspacePage = () => {
   const { status, setStatus, jobId, processingStage, setProcessingStage, viewMode, setViewMode, setWorldId, worldId, setWorldData } = useWorldStore();
@@ -49,17 +49,16 @@ export const WorkspacePage = () => {
         <div className="p-4 border-b border-neutral-800">
           <h3 className="text-xs font-semibold tracking-widest text-neutral-500 mb-3">WORLD LAYERS</h3>
           <div className="space-y-1">
-            <ViewModeButton active={viewMode === 'reality'} onClick={() => setViewMode('reality')} icon={<Eye size={14} />} label="REALITY" desc="Observed only" />
-            <ViewModeButton active={viewMode === 'inferred'} onClick={() => setViewMode('inferred')} icon={<Layers size={14} />} label="INFERRED" desc="Observed + Inferred" />
-            <ViewModeButton active={viewMode === 'complete'} onClick={() => setViewMode('complete')} icon={<Target size={14} />} label="COMPLETE WORLD" desc="Generated regions" />
+            <ViewModeButton active={viewMode === 'reality'} onClick={() => setViewMode('reality')} icon={<Eye size={14} />} label="RECONSTRUCTED" desc="Observed geometry only" />
+            <ViewModeButton active={viewMode === 'complete'} onClick={() => setViewMode('complete')} icon={<Target size={14} />} label="COMPLETED" desc="Observed + Generated" />
           </div>
         </div>
         
         <div className="p-4 border-b border-neutral-800">
           <h3 className="text-xs font-semibold tracking-widest text-neutral-500 mb-3">ANALYSIS</h3>
           <div className="space-y-1">
-            <ViewModeButton active={viewMode === 'uncertainty'} onClick={() => setViewMode('uncertainty')} icon={<AlertTriangle size={14} />} label="UNCERTAINTY" desc="Confidence Heatmap" />
-            <ViewModeButton active={viewMode === 'coverage'} onClick={() => setViewMode('coverage')} icon={<Activity size={14} />} label="COVERAGE" desc="Observed vs Unseen" />
+            <ViewModeButton active={viewMode === 'uncertainty'} onClick={() => setViewMode('uncertainty')} icon={<AlertTriangle size={14} />} label="EVIDENCE VIEW" desc="Provenance tracking" />
+            <ViewModeButton active={viewMode === 'coverage'} onClick={() => setViewMode('coverage')} icon={<Activity size={14} />} label="UNSEEN REGIONS" desc="Highlight missing geometry" />
           </div>
         </div>
       </div>

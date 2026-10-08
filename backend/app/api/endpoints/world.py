@@ -142,7 +142,9 @@ async def complete_world(world_id: str):
             "scale": [10, 3, 0.2],
             "status": "generated",
             "confidence": 0.87,
-            "evidence": ["Adjacent wall geometry", "Floor boundary", "Room dimensions"],
+            "reason": "Continuation of observed wall plane to enclose room",
+            "supporting_elements": ["wall_01", "floor_01", "ceiling_01"],
+            "constraints": ["coplanar", "floor_connected", "ceiling_connected"],
             "validated": True,
             "material": {"color": "#94a3b8"}
         })

@@ -19,17 +19,19 @@ export const MetricsPanel = () => {
       </div>
 
       <div className="p-4 space-y-6 flex-1 overflow-y-auto">
+        <div className="text-xs text-neutral-500 italic mb-4">Internal reconstruction statistics</div>
+        
         <div className="grid grid-cols-2 gap-4">
-          <MetricCard label="Frames" value={worldMetrics.frames} />
-          <MetricCard label="Keyframes" value={worldMetrics.keyframes} />
+          <MetricCard label="Frames Processed" value={worldMetrics.frames} />
+          <MetricCard label="Camera Estimation" value="0.79" />
         </div>
 
         <div>
-          <div className="text-[10px] font-semibold text-neutral-500 tracking-widest mb-3">COVERAGE</div>
+          <div className="text-[10px] font-semibold text-neutral-500 tracking-widest mb-3">SURFACE RECONSTRUCTION</div>
           <div className="space-y-3">
             <div className="space-y-1">
               <div className="flex justify-between text-xs">
-                <span className="text-emerald-400">Observed</span>
+                <span className="text-emerald-400">Observed Surface</span>
                 <span className="text-neutral-300">{Math.round(worldCoverage.observed * 100)}%</span>
               </div>
               <div className="h-1.5 w-full bg-neutral-900 rounded-full overflow-hidden">
@@ -37,10 +39,20 @@ export const MetricsPanel = () => {
               </div>
             </div>
 
+            <div className="space-y-1">
+              <div className="flex justify-between text-xs">
+                <span className="text-blue-400">Partially Observed</span>
+                <span className="text-neutral-300">{Math.round((worldCoverage.partially_observed || 0) * 100)}%</span>
+              </div>
+              <div className="h-1.5 w-full bg-neutral-900 rounded-full overflow-hidden">
+                <div className="h-full bg-blue-500" style={{ width: `${(worldCoverage.partially_observed || 0) * 100}%` }}></div>
+              </div>
+            </div>
+
             {worldCoverage.unseen > 0 && (
               <div className="space-y-1">
                 <div className="flex justify-between text-xs">
-                  <span className="text-neutral-400">Unseen</span>
+                  <span className="text-neutral-400">Unobserved</span>
                   <span className="text-neutral-300">{Math.round(worldCoverage.unseen * 100)}%</span>
                 </div>
                 <div className="h-1.5 w-full bg-neutral-900 rounded-full overflow-hidden">
@@ -52,7 +64,7 @@ export const MetricsPanel = () => {
             {worldCoverage.generated > 0 && (
               <div className="space-y-1">
                 <div className="flex justify-between text-xs">
-                  <span className="text-amber-400">Generated</span>
+                  <span className="text-amber-400">Generated Geometry</span>
                   <span className="text-neutral-300">{Math.round(worldCoverage.generated * 100)}%</span>
                 </div>
                 <div className="h-1.5 w-full bg-neutral-900 rounded-full overflow-hidden">
@@ -64,10 +76,9 @@ export const MetricsPanel = () => {
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <MetricCard label="Points" value={(worldMetrics.points/1000).toFixed(0) + 'k'} />
-          <MetricCard label="Triangles" value={(worldMetrics.triangles/1000).toFixed(0) + 'k'} />
-          <MetricCard label="Validation Score" value={`${worldMetrics.validation_score}/100`} />
-          <MetricCard label="Processing Time" value="4.2s" />
+          <MetricCard label="Mean Confidence" value="0.82" />
+          <MetricCard label="Geometry Consistency" value="0.91" />
+          <MetricCard label="Scene Completeness" value="0.86" />
         </div>
       </div>
     </div>

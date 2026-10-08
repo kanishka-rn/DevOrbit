@@ -6,11 +6,19 @@ export type SceneNode = {
   position: [number, number, number];
   rotation: [number, number, number];
   scale: [number, number, number];
-  status: "observed" | "inferred" | "generated";
+  status: "observed" | "inferred" | "generated" | "unobserved" | "partially_observed";
   confidence: number;
   evidence: string[];
   validated: boolean;
   material?: { color: string };
+  observationCount?: number;
+  visibleFrames?: number[];
+  visibilityScore?: number;
+  occludedBy?: string[];
+  reason?: string;
+  supporting_elements?: string[];
+  constraints?: string[];
+  source?: string;
 };
 
 interface WorldState {

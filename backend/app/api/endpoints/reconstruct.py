@@ -13,8 +13,8 @@ OUTPUT_DIR = "data/outputs"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 from app.pipeline.frame_extractor import FrameExtractor
-from app.pipeline.camera_estimation import CameraEstimator
-from app.pipeline.depth_estimation import DepthEstimator
+from app.pipeline.camera_estimation import get_camera_estimator
+from app.pipeline.depth_estimation import get_depth_estimator
 from app.pipeline.reconstruction import SceneReconstructor
 from app.pipeline.visibility import VisibilityMapper
 from app.pipeline.completion import SceneCompleter
@@ -58,11 +58,11 @@ async def process_reconstruction(job_id: str, input_id: str, mode: str = "video"
             frames = [{"frame_id": i, "timestamp": i*0.5, "path": f"mock_{i}.jpg", "quality": 0.9} for i in range(10)]
             
         jobs[job_id] = {"status": "processing", "stage": "Camera estimated", "progress": 40, "message": "Estimating camera poses..."}
-        cam_estimator = CameraEstimator()
+        cam_estimator = get_camera_estimator()
         cameras = cam_estimator.estimate(frames)
         
         jobs[job_id] = {"status": "processing", "stage": "Depth generated", "progress": 50, "message": "Generating depth maps..."}
-        depth_estimator = DepthEstimator()
+        depth_estimator = get_depth_estimator()
         depths = depth_estimator.estimate(frames)
         
         jobs[job_id] = {"status": "processing", "stage": "3D geometry built", "progress": 60, "message": "Building point cloud..."}

@@ -31,14 +31,66 @@ export const ProvenancePanel = () => {
         </div>
 
         <div>
-          <div className="text-[10px] font-semibold text-neutral-500 tracking-widest mb-3">EVIDENCE USED</div>
-          <ul className="space-y-2 text-xs text-neutral-300">
-            {node.evidence.map((ev: string, idx: number) => (
-              <li key={idx} className="flex items-center gap-2">
-                <CheckCircle size={14} className="text-emerald-500" /> {ev}
-              </li>
-            ))}
-          </ul>
+          <div className="text-[10px] font-semibold text-neutral-500 tracking-widest mb-3">EVIDENCE RECORD</div>
+          
+          <div className="space-y-3 text-xs">
+            {node.status === 'observed' && (
+              <>
+                <div className="flex justify-between border-b border-neutral-800 pb-1">
+                  <span className="text-neutral-500">Observation Count</span>
+                  <span className="text-neutral-300">{node.observationCount || 'N/A'} frames</span>
+                </div>
+                {(node.visibleFrames && node.visibleFrames.length > 0) && (
+                  <div className="flex justify-between border-b border-neutral-800 pb-1">
+                    <span className="text-neutral-500">Source Frames</span>
+                    <span className="text-neutral-300">[{node.visibleFrames.slice(0, 3).join(', ')}{node.visibleFrames.length > 3 ? ', ...' : ''}]</span>
+                  </div>
+                )}
+              </>
+            )}
+
+            {(isGenerated || node.status === 'inferred') && (
+              <>
+                <div className="flex justify-between border-b border-neutral-800 pb-1">
+                  <span className="text-neutral-500">Direct Observation</span>
+                  <span className="text-neutral-300">None</span>
+                </div>
+                {node.reason && (
+                  <div className="flex flex-col border-b border-neutral-800 pb-1 gap-1">
+                    <span className="text-neutral-500">Reason</span>
+                    <span className="text-neutral-300">{node.reason}</span>
+                  </div>
+                )}
+                {node.supporting_elements && (
+                  <div className="flex flex-col border-b border-neutral-800 pb-1 gap-1">
+                    <span className="text-neutral-500">Supporting Elements</span>
+                    <div className="flex gap-1 flex-wrap">
+                      {node.supporting_elements.map((el: string) => (
+                        <span key={el} className="px-1.5 py-0.5 bg-neutral-800 rounded">{el}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {node.constraints && (
+                  <div className="flex flex-col border-b border-neutral-800 pb-1 gap-1">
+                    <span className="text-neutral-500">Constraints Enforced</span>
+                    <div className="flex gap-1 flex-wrap">
+                      {node.constraints.map((c: string) => (
+                        <span key={c} className="px-1.5 py-0.5 border border-neutral-700 rounded text-neutral-400">{c}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
+            {node.occludedBy && node.occludedBy.length > 0 && (
+              <div className="flex justify-between border-b border-neutral-800 pb-1">
+                <span className="text-neutral-500">Occlusion (Hidden behind)</span>
+                <span className="text-neutral-300">{node.occludedBy.join(', ')}</span>
+              </div>
+            )}
+          </div>
         </div>
 
         {node.validated && (

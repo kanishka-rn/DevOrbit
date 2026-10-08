@@ -1,11 +1,25 @@
 class DepthEstimator:
     def estimate(self, frames):
-        # Fallback to planar/heuristic depth
+        raise NotImplementedError
+
+class FallbackDepthEstimator(DepthEstimator):
+    def estimate(self, frames):
         depth_maps = []
         for frame in frames:
             depth_maps.append({
                 "frame_id": frame["frame_id"],
-                "method": "heuristic_fallback",
+                "method": "fallback",
                 "mean_depth": 3.5
             })
-        return depth_maps
+        return {
+            "method": "fallback",
+            "depths": depth_maps
+        }
+
+class PretrainedDepthEstimator(DepthEstimator):
+    def estimate(self, frames):
+        # Placeholder for MiDaS / ZoeDepth
+        pass
+
+def get_depth_estimator():
+    return FallbackDepthEstimator()
