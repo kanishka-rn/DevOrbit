@@ -45,6 +45,7 @@ interface WorldState {
   setJobId: (id: string | null) => void;
   setProcessingStage: (stage: string) => void;
   setSceneNodes: (nodes: SceneNode[]) => void;
+  setWorldValidation: (evalData: any) => void;
   setWorldData: (data: any) => void;
 }
 
@@ -71,6 +72,7 @@ export const useWorldStore = create<WorldState>((set) => ({
   setJobId: (id) => set({ jobId: id }),
   setProcessingStage: (stage) => set({ processingStage: stage }),
   setSceneNodes: (nodes) => set({ sceneNodes: nodes }),
+  setWorldValidation: (evalData) => set({ worldValidation: evalData }),
   setWorldData: (data) => set({
     sceneNodes: data.nodes || [],
     sceneGraph: data.scene_graph || null,

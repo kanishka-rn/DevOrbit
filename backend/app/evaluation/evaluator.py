@@ -26,11 +26,26 @@ class GroundTruthEvaluator:
 
     def apply_noise(self, nodes, noise_params):
         noisy_nodes = []
-        geo_noise = noise_params.get("geometry_noise", 0.03)
+        geo_noise = noise_params.get("geometry_noise", 0.0)
+        camera_noise = noise_params.get("camera_noise", 0.0)
+        depth_noise = noise_params.get("depth_noise", 0.0)
+        missing_ratio = noise_params.get("missing_observation_ratio", 0.0)
+        
         for node in nodes:
+            # Missing observation check (drop node entirely from input)
+            if random.random() < missing_ratio and node["type"] != "floor":
+                continue
+                
             noisy_node = dict(node)
-            # Add noise to position
-            noisy_node["position"] = [p + random.uniform(-geo_noise, geo_noise) for p in node["position"]]
+            # Add translation noise (geometry + depth/camera simulated drift)
+            drift = geo_noise + (camera_noise * 0.5) + (depth_noise * 0.5)
+            noisy_node["position"] = [p + random.uniform(-drift, drift) for p in node["position"]]
+            
+            # Add rotation noise
+            if "rotation" in node:
+                rot_noise = camera_noise * 0.5  # radians
+                noisy_node["rotation"] = [r + random.uniform(-rot_noise, rot_noise) for r in node["rotation"]]
+                
             noisy_nodes.append(noisy_node)
         return noisy_nodes
 
@@ -72,6 +87,45 @@ class GroundTruthEvaluator:
         
         overall_completeness = (len(observed_evals) + len(completion_evals)) / len(self.gt["nodes"])
         
+        # Calculate Difference view metadata
+        difference_metadata = []
+        for p_node in prediction_nodes:
+            # Find closest GT
+            closest_gt = None
+            best_iou = 0
+            for gt_node in self.gt["nodes"]:
+                iou = compute_box_iou(p_node, gt_node)
+                if iou > best_iou:
+                    best_iou = iou
+                    closest_gt = gt_node
+            
+            diff_status = "extra"
+            error_val = 0
+            if closest_gt:
+                error_val = compute_geometric_error(p_node, closest_gt)
+                if best_iou > 0.85:
+                    diff_status = "correct"
+                elif best_iou > 0.01:
+                    diff_status = "misaligned"
+            
+            difference_metadata.append({
+                "region_id": p_node["id"],
+                "status": diff_status,
+                "position_error": round(error_val, 3),
+                "overlap": round(best_iou, 3)
+            })
+            
+        # Add missing
+        predicted_ids = [m["region_id"] for m in difference_metadata]
+        for gt_node in self.gt["nodes"]:
+            # If no prediction had this GT as closest with > 0.1 IoU
+            matched = any(m["overlap"] > 0.1 for m in difference_metadata if m["overlap"] > 0)
+            # Simplification:
+            difference_metadata.append({
+                "region_id": f"missing_{gt_node['id']}",
+                "status": "missing"
+            })
+        
         return {
             "scene_id": self.gt["scene_id"],
             "scenario": self.scenario["scenario"],
@@ -90,6 +144,7 @@ class GroundTruthEvaluator:
             "details": {
                 "observed": observed_evals,
                 "completion": completion_evals
-            }
+            },
+            "difference": difference_metadata
         }
 

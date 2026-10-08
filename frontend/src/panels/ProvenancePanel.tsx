@@ -2,13 +2,16 @@ import { useWorldStore } from '../stores/useWorldStore';
 import { X, CheckCircle, ShieldAlert } from 'lucide-react';
 
 export const ProvenancePanel = () => {
-  const { selectedRegion, setSelectedRegion, sceneNodes } = useWorldStore();
+  const { selectedRegion, setSelectedRegion, sceneNodes, worldValidation } = useWorldStore();
 
   const node = sceneNodes.find(n => n.id === selectedRegion);
 
   if (!node) return null;
 
   const isGenerated = node.status === 'generated';
+  
+  // Find validation data if available
+  const diffMeta = worldValidation?.difference?.find((d: any) => d.region_id === node.id);
 
   return (
     <div className="flex flex-col h-full">
@@ -81,10 +84,19 @@ export const ProvenancePanel = () => {
                     </div>
                   </div>
                 )}
-                <div className="mt-4 p-3 bg-emerald-950/30 border border-emerald-900 rounded flex justify-between items-center">
-                  <span className="text-emerald-500 text-xs font-bold uppercase">Measured ground-truth similarity</span>
-                  <span className="text-emerald-400 font-mono font-bold text-base">84%</span>
-                </div>
+                
+                {diffMeta && (
+                  <div className="mt-4 p-3 bg-indigo-950/30 border border-indigo-900 rounded flex flex-col gap-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-indigo-400 text-[10px] font-bold uppercase tracking-wider">Ground-Truth Match</span>
+                      <span className="text-indigo-300 font-mono font-bold text-sm">{Math.round(diffMeta.overlap * 100)}%</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-indigo-400 text-[10px] font-bold uppercase tracking-wider">Geometric Error</span>
+                      <span className="text-indigo-300 font-mono font-bold text-sm">{diffMeta.position_error}m</span>
+                    </div>
+                  </div>
+                )}
               </>
             )}
 

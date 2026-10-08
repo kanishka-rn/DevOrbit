@@ -1,0 +1,14 @@
+{
+  "scenario": "partial_ceiling",
+  "description": "Ceiling is partially observed, resting on visible walls.",
+  "observed": [
+    "floor_01",
+    "wall_01",
+    "wall_02",
+    "wall_03",
+    "wall_04"
+  ],
+  "hidden": [
+    "ceiling_01"
+  ]
+}

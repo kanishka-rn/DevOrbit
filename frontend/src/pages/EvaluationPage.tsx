@@ -23,6 +23,7 @@ export const EvaluationPage = () => {
       const res = await apiClient.get(`/evaluation/${worldId}`);
       if (res.data) {
         setReport(res.data);
+        useWorldStore.getState().setWorldValidation(res.data);
         if (res.data.scenario) setScenario(res.data.scenario);
       }
     } catch (e) {
@@ -36,6 +37,7 @@ export const EvaluationPage = () => {
     try {
       const res = await apiClient.post(`/evaluation/run/${worldId}?scenario=${scenario}`);
       setReport(res.data.report);
+      useWorldStore.getState().setWorldValidation(res.data.report);
     } catch (e) {
       console.error(e);
     }

@@ -1,0 +1,20 @@
+{
+  "scenario": "low_evidence",
+  "description": "Very weak camera evidence, incomplete structural boundary.",
+  "observed": [
+    "floor_01",
+    "wall_01"
+  ],
+  "hidden": [
+    "wall_02",
+    "wall_03",
+    "wall_04",
+    "sofa_01"
+  ],
+  "noise_profile": {
+    "geometry_noise": 0.08,
+    "camera_noise": 0.05,
+    "depth_noise": 0.10,
+    "missing_observation_ratio": 0.40
+  }
+}

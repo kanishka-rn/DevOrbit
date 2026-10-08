@@ -1,0 +1,14 @@
+{
+  "scenario": "partial_back_wall",
+  "description": "The back wall is partially observed, but a large portion is hidden.",
+  "observed": [
+    "floor_01",
+    "wall_01",
+    "wall_02",
+    "wall_03",
+    "sofa_01"
+  ],
+  "hidden": [
+    "wall_04"
+  ]
+}
