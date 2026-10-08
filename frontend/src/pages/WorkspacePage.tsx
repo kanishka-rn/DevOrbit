@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useWorldStore } from '../stores/useWorldStore';
-import { getReconstructStatus, completeWorld, getWorld } from '../api/client';
+import { getReconstructStatus, getWorld } from '../api/client';
 import { ThreeViewer } from '../viewer/ThreeViewer';
 import { Panels } from '../panels/Panels';
 import { Layers, Eye, Target, AlertTriangle, Activity } from 'lucide-react';

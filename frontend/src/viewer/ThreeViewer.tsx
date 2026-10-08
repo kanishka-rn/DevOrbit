@@ -1,7 +1,7 @@
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment, Grid, Html } from '@react-three/drei';
 import { useWorldStore } from '../stores/useWorldStore';
-import { Suspense, useMemo } from 'react';
+import { Suspense } from 'react';
 import * as THREE from 'three';
 
 const DynamicScene = () => {

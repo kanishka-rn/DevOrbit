@@ -1,5 +1,5 @@
 import { Outlet } from 'react-router-dom';
-import { Layers, Cuboid, Eye, Wand2, BarChart2, Download, Settings } from 'lucide-react';
+import { Layers, Cuboid, Wand2, BarChart2, Download, Settings } from 'lucide-react';
 import { useWorldStore } from '../stores/useWorldStore';
 
 export const AppLayout = () => {
