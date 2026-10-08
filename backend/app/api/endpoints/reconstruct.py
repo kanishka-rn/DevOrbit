@@ -12,7 +12,23 @@ jobs = {}
 OUTPUT_DIR = "data/outputs"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
+from app.pipeline.frame_extractor import FrameExtractor
+from app.pipeline.camera_estimation import CameraEstimator
+from app.pipeline.depth_estimation import DepthEstimator
+from app.pipeline.reconstruction import SceneReconstructor
+from app.pipeline.visibility import VisibilityMapper
+from app.pipeline.completion import SceneCompleter
+from app.pipeline.provenance import ProvenanceGenerator
+import glob
+
 async def process_reconstruction(job_id: str, input_id: str, mode: str = "video"):
+    # Find the actual input path
+    video_path = None
+    if input_id != "demo_input_id":
+        possible_files = glob.glob(f"data/inputs/{input_id}_*")
+        if possible_files:
+            video_path = possible_files[0]
+            
     if mode == "blueprint":
         jobs[job_id] = {"status": "processing", "stage": "Parsing blueprint", "progress": 10, "message": "Analyzing architectural layout..."}
         await asyncio.sleep(1)
@@ -23,108 +39,69 @@ async def process_reconstruction(job_id: str, input_id: str, mode: str = "video"
         jobs[job_id] = {"status": "processing", "stage": "Semantic layout", "progress": 55, "message": "Assigning semantics..."}
         await asyncio.sleep(1)
         jobs[job_id] = {"status": "processing", "stage": "3D geometry built", "progress": 70, "message": "Generating volumes..."}
-        await asyncio.sleep(1)
+        
+        reconstructor = SceneReconstructor()
+        nodes = reconstructor.reconstruct([], {}, [])
+        
         jobs[job_id] = {"status": "processing", "stage": "Visibility mapped", "progress": 85, "message": "Projecting visibility..."}
         await asyncio.sleep(1)
+        
+        frames = []
+        coverage = {"observed": 0.68, "occluded": 0.12, "unseen": 0.20, "generated": 0}
+        
     else:
-        jobs[job_id] = {"status": "processing", "stage": "Input analyzed", "progress": 10, "message": "Analyzing video..."}
-        await asyncio.sleep(1)
-        jobs[job_id] = {"status": "processing", "stage": "Frames extracted", "progress": 20, "message": "Extracting frames..."}
-        await asyncio.sleep(1)
-        jobs[job_id] = {"status": "processing", "stage": "Keyframes selected", "progress": 30, "message": "Selecting keyframes..."}
-        await asyncio.sleep(1)
+        jobs[job_id] = {"status": "processing", "stage": "Frames extracted", "progress": 20, "message": "Extracting frames from video..."}
+        extractor = FrameExtractor()
+        frames = extractor.extract(video_path) if video_path else []
+        if not frames:
+            # mock frames if missing video
+            frames = [{"frame_id": i, "timestamp": i*0.5, "path": f"mock_{i}.jpg", "quality": 0.9} for i in range(10)]
+            
         jobs[job_id] = {"status": "processing", "stage": "Camera estimated", "progress": 40, "message": "Estimating camera poses..."}
-        await asyncio.sleep(1)
+        cam_estimator = CameraEstimator()
+        cameras = cam_estimator.estimate(frames)
+        
         jobs[job_id] = {"status": "processing", "stage": "Depth generated", "progress": 50, "message": "Generating depth maps..."}
-        await asyncio.sleep(1)
+        depth_estimator = DepthEstimator()
+        depths = depth_estimator.estimate(frames)
+        
         jobs[job_id] = {"status": "processing", "stage": "3D geometry built", "progress": 60, "message": "Building point cloud..."}
-        await asyncio.sleep(1)
+        reconstructor = SceneReconstructor()
+        nodes = reconstructor.reconstruct(frames, cameras, depths)
+        
         jobs[job_id] = {"status": "processing", "stage": "Scene graph created", "progress": 70, "message": "Creating scene graph..."}
-        await asyncio.sleep(1)
+        await asyncio.sleep(0.5)
+        
         jobs[job_id] = {"status": "processing", "stage": "Visibility analyzed", "progress": 80, "message": "Analyzing visibility..."}
-        await asyncio.sleep(1)
+        vis_mapper = VisibilityMapper()
+        nodes, coverage = vis_mapper.compute(nodes, cameras)
+        
         jobs[job_id] = {"status": "processing", "stage": "Missing regions detected", "progress": 90, "message": "Detecting missing regions..."}
-        await asyncio.sleep(1)
+        completer = SceneCompleter()
+        nodes = completer.complete(nodes)
+        
+        prov_gen = ProvenanceGenerator()
+        nodes = prov_gen.annotate(nodes, frames)
+
     
     world_id = str(uuid.uuid4())
     
     world_state = {
         "world_id": world_id,
         "input": {"input_id": input_id},
-        "nodes": [
-            {
-                "id": "floor_01",
-                "type": "floor",
-                "position": [0, 0, 0],
-                "rotation": [-1.5708, 0, 0],
-                "scale": [10, 10, 1],
-                "status": "observed",
-                "confidence": 0.99,
-                "evidence": ["Video coverage: 95%"],
-                "validated": True,
-                "material": {"color": "#f5f5f5"}
-            },
-            {
-                "id": "wall_01",
-                "type": "wall",
-                "position": [0, 1.5, -5],
-                "rotation": [0, 0, 0],
-                "scale": [10, 3, 0.2],
-                "status": "observed",
-                "confidence": 0.95,
-                "evidence": ["Direct visual observation"],
-                "validated": True,
-                "material": {"color": "#f5f5f5"}
-            },
-            {
-                "id": "wall_02",
-                "type": "wall",
-                "position": [-5, 1.5, 0],
-                "rotation": [0, 1.5708, 0],
-                "scale": [10, 3, 0.2],
-                "status": "observed",
-                "confidence": 0.93,
-                "evidence": ["Direct visual observation"],
-                "validated": True,
-                "material": {"color": "#f5f5f5"}
-            },
-            {
-                "id": "wall_03",
-                "type": "wall",
-                "position": [5, 1.5, 0],
-                "rotation": [0, -1.5708, 0],
-                "scale": [10, 3, 0.2],
-                "status": "inferred",
-                "confidence": 0.85,
-                "evidence": ["Room boundary extension", "Floor intersection"],
-                "validated": True,
-                "material": {"color": "#cbd5e1"}
-            },
-            {
-                "id": "sofa_01",
-                "type": "object",
-                "position": [0, 0.5, -2],
-                "rotation": [0, 0, 0],
-                "scale": [2, 1, 1],
-                "status": "observed",
-                "confidence": 0.96,
-                "evidence": ["Instance segmentation", "Depth projection"],
-                "validated": True,
-                "material": {"color": "#f5f5f5"}
-            }
-        ],
+        "nodes": nodes,
         "scene_graph": {
             "relations": [
                 {"source": "sofa_01", "target": "wall_02", "type": "AGAINST"},
                 {"source": "sofa_01", "target": "floor_01", "type": "ON"}
             ]
         },
-        "coverage": {"observed": 0.68, "occluded": 0.12, "unseen": 0.20, "generated": 0},
+        "coverage": coverage,
         "metrics": {
-            "frames": 84,
-            "keyframes": 18,
-            "observed_coverage": 0.68,
-            "generated_coverage": 0,
+            "frames": len(frames),
+            "keyframes": max(1, len(frames) // 2),
+            "observed_coverage": coverage["observed"],
+            "generated_coverage": coverage["generated"],
             "points": 150000,
             "triangles": 50000,
             "validation_score": 92,

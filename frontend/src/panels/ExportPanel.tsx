@@ -8,10 +8,17 @@ export const ExportPanel = () => {
   const handleExport = async (format: string) => {
     if (!worldId) return;
     try {
-      const res = await apiClient.get(`/world/${worldId}/export/${format}`);
-      alert(`Export ready: ${res.data.url}\n(In a full implementation, this would trigger a file download)`);
+      const res = await apiClient.get(`/world/${worldId}/export/${format}`, { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `spacemind_${worldId}.${format}`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
     } catch (e) {
       console.error("Export failed", e);
+      alert("Failed to export scene. Please try again.");
     }
   };
 

@@ -174,10 +174,27 @@ async def edit_world(world_id: str, edit: EditRequest):
     
     return {"world_id": world_id, "edit": edit.dict(), "status": "applied", "version": new_version}
 
+from fastapi.responses import FileResponse
+from app.pipeline.export import export_scene
+
 @router.get("/{world_id}/export/glb")
 async def export_glb(world_id: str):
-    return {"url": f"/exports/{world_id}/scene.glb"}
+    world = await get_world(world_id)
+    filepath = export_scene(world_id, world["nodes"], "glb")
+    return FileResponse(path=filepath, filename=f"spacemind_{world_id}.glb", media_type="model/gltf-binary")
 
 @router.get("/{world_id}/export/ply")
 async def export_ply(world_id: str):
-    return {"url": f"/exports/{world_id}/scene.ply"}
+    world = await get_world(world_id)
+    filepath = export_scene(world_id, world["nodes"], "ply")
+    return FileResponse(path=filepath, filename=f"spacemind_{world_id}.ply", media_type="application/octet-stream")
+
+@router.get("/{world_id}/export/json")
+async def export_json(world_id: str):
+    world = await get_world(world_id)
+    OUTPUT_DIR = "data/exports"
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    filepath = f"{OUTPUT_DIR}/{world_id}_scene.json"
+    with open(filepath, "w") as f:
+        json.dump(world, f, indent=2)
+    return FileResponse(path=filepath, filename=f"spacemind_{world_id}.json", media_type="application/json")
