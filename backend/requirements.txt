@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+pydantic
+opencv-python
+numpy
+open3d
+torch
+torchvision
+python-multipart
+sqlalchemy
+aiofiles
