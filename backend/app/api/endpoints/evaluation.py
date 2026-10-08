@@ -1,14 +1,41 @@
 from fastapi import APIRouter
 from app.evaluation.evaluator import GroundTruthEvaluator
 from app.api.endpoints.world import get_world
+from app.pipeline.completion import SceneCompleter
 
 router = APIRouter()
 
 @router.post("/run/{world_id}")
-async def run_evaluation(world_id: str):
+async def run_evaluation(world_id: str, scenario: str = "hidden_back_wall"):
     world = await get_world(world_id)
-    evaluator = GroundTruthEvaluator()
-    report = evaluator.evaluate(world["nodes"])
+    evaluator = GroundTruthEvaluator(scenario_name=scenario)
+    completer = SceneCompleter()
+    
+    # Base nodes without completions for fair baseline
+    base_nodes = [n for n in world["nodes"] if n.get("status") != "generated"]
+    
+    # Apply noise if the scenario specifies it
+    if "noise_profile" in evaluator.scenario:
+        base_nodes = evaluator.apply_noise(base_nodes, evaluator.scenario["noise_profile"])
+    
+    # 1. Geometry Only
+    geom_nodes = completer.complete(list(base_nodes), mode="geometry_only")
+    rep_geom = evaluator.evaluate(geom_nodes)
+    
+    # 2. Structural Constraints
+    struct_nodes = completer.complete(list(base_nodes), mode="structural")
+    rep_struct = evaluator.evaluate(struct_nodes)
+    
+    # 3. Full SpaceMind
+    full_nodes = completer.complete(list(base_nodes), mode="full")
+    rep_full = evaluator.evaluate(full_nodes)
+    
+    report = rep_full.copy()
+    report["ablation"] = {
+        "geometry_only": {"iou": rep_geom["completion"]["iou"], "error": rep_geom["completion"]["geometric_error"]},
+        "structural": {"iou": rep_struct["completion"]["iou"], "error": rep_struct["completion"]["geometric_error"]},
+        "full": {"iou": rep_full["completion"]["iou"], "error": rep_full["completion"]["geometric_error"]}
+    }
     
     # Save the report internally to the world object for persistence
     world["evaluation"] = report

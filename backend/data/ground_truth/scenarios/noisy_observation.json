@@ -1,0 +1,19 @@
+{
+  "scenario": "noisy_observation",
+  "description": "Camera tracks perfectly but depth maps inject multi-centimeter noise across geometry boundaries.",
+  "observed": [
+    "floor_01",
+    "wall_01",
+    "wall_02",
+    "wall_03",
+    "sofa_01"
+  ],
+  "hidden": [
+    "wall_04"
+  ],
+  "noise_profile": {
+    "geometry_noise": 0.05,
+    "camera_noise": 0.02,
+    "depth_noise": 0.05
+  }
+}

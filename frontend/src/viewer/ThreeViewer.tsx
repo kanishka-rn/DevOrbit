@@ -28,7 +28,13 @@ const DynamicScene = () => {
       if (regionType === 'generated') return new THREE.MeshStandardMaterial({ color: '#f43f5e', emissive: '#f43f5e', emissiveIntensity: 0.5 }); // bright rose
     }
 
-    if (viewMode === 'reality' && (regionType === 'inferred' || regionType === 'generated')) {
+    if (viewMode === 'difference') {
+      if (regionType === 'generated') return new THREE.MeshStandardMaterial({ color: '#ef4444', emissive: '#ef4444', emissiveIntensity: 0.5, wireframe: true }); // Red error
+      if (regionType === 'partially_observed') return new THREE.MeshStandardMaterial({ color: '#f59e0b', emissive: '#f59e0b', emissiveIntensity: 0.5 }); // Amber
+      return new THREE.MeshStandardMaterial({ color: '#111827', transparent: true, opacity: 0.1 }); // ghostly GT baseline
+    }
+
+    if (viewMode === 'reality' && (regionType === 'inferred' || regionType === 'generated' || regionType === 'unobserved')) {
       return new THREE.MeshBasicMaterial({ visible: false });
     }
     
@@ -46,8 +52,40 @@ const DynamicScene = () => {
   return (
     <group>
       {sceneNodes.map((node) => {
-        const material = getMaterial(node);
+        const nodeMaterial = getMaterial(node);
         const args = node.scale || [1, 1, 1];
+        
+        // Render sub-regions if available
+        if (node.regions && node.regions.length > 0 && viewMode !== 'complete' && viewMode !== 'reality') {
+          return (
+            <group key={node.id} position={node.position} rotation={node.rotation}>
+              {node.regions?.map((region: any, i: number) => {
+                 // Distribute regions along the main axis.
+                 // For simplicity, just divide X
+                 const numReg = node.regions!.length;
+                 const regW = args[0] / numReg;
+                 const offsetX = -args[0]/2 + regW/2 + (i * regW);
+                 const rArgs = [regW, args[1], args[2]];
+                 const rMat = getMaterial({...region, material: node.material, type: node.type});
+                 
+                 return (
+                   <mesh 
+                     key={region.id} 
+                     position={[offsetX, 0, 0]}
+                     onPointerDown={(e) => handlePointerDown(e, node.id)} // Keep selecting the parent node
+                   >
+                     {node.type === 'floor' ? (
+                       <planeGeometry args={[rArgs[0], rArgs[1]]} />
+                     ) : (
+                       <boxGeometry args={[rArgs[0], rArgs[1], rArgs[2]]} />
+                     )}
+                     <primitive object={rMat} />
+                   </mesh>
+                 )
+              })}
+            </group>
+          )
+        }
         
         return (
           <mesh
@@ -61,7 +99,7 @@ const DynamicScene = () => {
             ) : (
               <boxGeometry args={[args[0], args[1], args[2]]} />
             )}
-            <primitive object={material} />
+            <primitive object={nodeMaterial} />
           </mesh>
         );
       })}

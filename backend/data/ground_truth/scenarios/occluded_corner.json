@@ -1,0 +1,14 @@
+{
+  "scenario": "occluded_corner",
+  "description": "The camera sees the front and left walls, but the back right corner is occluded by the sofa.",
+  "observed": [
+    "floor_01",
+    "wall_01",
+    "wall_02",
+    "sofa_01"
+  ],
+  "hidden": [
+    "wall_03",
+    "wall_04"
+  ]
+}

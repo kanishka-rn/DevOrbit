@@ -59,6 +59,7 @@ export const WorkspacePage = () => {
           <div className="space-y-1">
             <ViewModeButton active={viewMode === 'uncertainty'} onClick={() => setViewMode('uncertainty')} icon={<AlertTriangle size={14} />} label="EVIDENCE VIEW" desc="Provenance tracking" />
             <ViewModeButton active={viewMode === 'coverage'} onClick={() => setViewMode('coverage')} icon={<Activity size={14} />} label="UNSEEN REGIONS" desc="Highlight missing geometry" />
+            <ViewModeButton active={viewMode === 'difference'} onClick={() => setViewMode('difference')} icon={<Eye size={14} />} label="DIFFERENCE VIEW" desc="Ground-truth error highlight" />
           </div>
         </div>
       </div>

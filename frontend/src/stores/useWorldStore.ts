@@ -19,12 +19,13 @@ export type SceneNode = {
   supporting_elements?: string[];
   constraints?: string[];
   source?: string;
+  regions?: any[];
 };
 
 interface WorldState {
   worldId: string | null;
   status: 'idle' | 'uploading' | 'processing' | 'ready';
-  viewMode: 'reality' | 'inferred' | 'complete' | 'uncertainty' | 'coverage';
+  viewMode: 'reality' | 'inferred' | 'complete' | 'uncertainty' | 'coverage' | 'difference';
   activePanel: 'reconstruction' | 'completion' | 'evidence' | 'appearance' | 'evaluation' | 'export' | null;
   selectedRegion: string | null;
   jobId: string | null;
@@ -38,7 +39,7 @@ interface WorldState {
   
   setWorldId: (id: string | null) => void;
   setStatus: (status: 'idle' | 'uploading' | 'processing' | 'ready') => void;
-  setViewMode: (mode: 'reality' | 'inferred' | 'complete' | 'uncertainty' | 'coverage') => void;
+  setViewMode: (mode: 'reality' | 'inferred' | 'complete' | 'uncertainty' | 'coverage' | 'difference') => void;
   setActivePanel: (panel: 'reconstruction' | 'completion' | 'evidence' | 'appearance' | 'evaluation' | 'export' | null) => void;
   setSelectedRegion: (regionId: string | null) => void;
   setJobId: (id: string | null) => void;
