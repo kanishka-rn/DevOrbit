@@ -1,13 +1,17 @@
 import { useWorldStore } from '../stores/useWorldStore';
 import { X, Wand2, Target } from 'lucide-react';
-import { completeWorld } from '../api/client';
+import { completeWorld, getWorld } from '../api/client';
 
 export const CompletionPanel = () => {
-  const { setActivePanel, worldId, setViewMode } = useWorldStore();
+  const { setActivePanel, worldId, setViewMode, setWorldData, sceneNodes } = useWorldStore();
+
+  const isCompleted = sceneNodes.some(n => n.id === 'wall_04' && n.status === 'generated');
 
   const handleComplete = async () => {
     if(worldId) {
       await completeWorld(worldId);
+      const data = await getWorld(worldId);
+      setWorldData(data);
       setViewMode('complete');
     }
   };
@@ -28,29 +32,41 @@ export const CompletionPanel = () => {
         
         <div>
           <div className="text-[10px] font-semibold text-neutral-500 tracking-widest mb-3 uppercase">Missing Regions</div>
-          <div className="space-y-2">
-            <div className="p-3 bg-neutral-900 border border-amber-500/30 rounded-md">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-bold text-amber-500">Camera-Blind Wall</span>
-                <span className="text-[10px] text-neutral-500">ID: wall_04</span>
-              </div>
-              <p className="text-xs text-neutral-400 mb-3">Occluded by camera trajectory. Needs evidence-grounded completion.</p>
-              <div className="text-[10px] space-y-1 text-neutral-500">
-                <div className="flex justify-between"><span>Hypothesis A:</span> <span className="text-emerald-500">Plain wall (87%)</span></div>
-                <div className="flex justify-between"><span>Hypothesis B:</span> <span>Window wall (12%)</span></div>
-                <div className="flex justify-between"><span>Hypothesis C:</span> <span>Door wall (1%)</span></div>
+          
+          {isCompleted ? (
+             <div className="p-3 bg-neutral-900 border border-emerald-500/30 rounded-md">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold text-emerald-500">Camera-Blind Wall Resolved</span>
+                </div>
+                <p className="text-xs text-neutral-400">Hypothesis A (Plain wall) generated and validated.</p>
+             </div>
+          ) : (
+            <div className="space-y-2">
+              <div className="p-3 bg-neutral-900 border border-amber-500/30 rounded-md">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold text-amber-500">Camera-Blind Wall</span>
+                  <span className="text-[10px] text-neutral-500">ID: wall_04</span>
+                </div>
+                <p className="text-xs text-neutral-400 mb-3">Occluded by camera trajectory. Needs evidence-grounded completion.</p>
+                <div className="text-[10px] space-y-1 text-neutral-500">
+                  <div className="flex justify-between"><span>Hypothesis A:</span> <span className="text-emerald-500">Plain wall (87%)</span></div>
+                  <div className="flex justify-between"><span>Hypothesis B:</span> <span>Window wall (12%)</span></div>
+                  <div className="flex justify-between"><span>Hypothesis C:</span> <span>Door wall (1%)</span></div>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
 
-        <button 
-          onClick={handleComplete}
-          className="w-full flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-md text-xs font-bold transition-colors"
-        >
-          <Target size={14} />
-          COMPLETE WORLD
-        </button>
+        {!isCompleted && (
+          <button 
+            onClick={handleComplete}
+            className="w-full flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-md text-xs font-bold transition-colors"
+          >
+            <Target size={14} />
+            COMPLETE WORLD
+          </button>
+        )}
 
       </div>
     </div>

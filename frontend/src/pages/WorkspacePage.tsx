@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useWorldStore } from '../stores/useWorldStore';
-import { getReconstructStatus, completeWorld } from '../api/client';
+import { getReconstructStatus, completeWorld, getWorld } from '../api/client';
 import { ThreeViewer } from '../viewer/ThreeViewer';
 import { Panels } from '../panels/Panels';
-import { Layers, Eye, Target, AlertTriangle } from 'lucide-react';
+import { Layers, Eye, Target, AlertTriangle, Activity } from 'lucide-react';
 
 export const WorkspacePage = () => {
-  const { status, setStatus, jobId, processingStage, setProcessingStage, viewMode, setViewMode, setWorldId, worldId } = useWorldStore();
+  const { status, setStatus, jobId, processingStage, setProcessingStage, viewMode, setViewMode, setWorldId, worldId, setWorldData } = useWorldStore();
 
   useEffect(() => {
     if (status === 'processing' && jobId) {
@@ -24,6 +24,14 @@ export const WorkspacePage = () => {
       return () => clearInterval(interval);
     }
   }, [status, jobId, setStatus, setProcessingStage, setWorldId]);
+
+  useEffect(() => {
+    if (status === 'ready' && worldId) {
+      getWorld(worldId).then(data => {
+        setWorldData(data);
+      });
+    }
+  }, [status, worldId, setWorldData]);
 
   if (status === 'processing') {
     return (
@@ -51,6 +59,7 @@ export const WorkspacePage = () => {
           <h3 className="text-xs font-semibold tracking-widest text-neutral-500 mb-3">ANALYSIS</h3>
           <div className="space-y-1">
             <ViewModeButton active={viewMode === 'uncertainty'} onClick={() => setViewMode('uncertainty')} icon={<AlertTriangle size={14} />} label="UNCERTAINTY" desc="Confidence Heatmap" />
+            <ViewModeButton active={viewMode === 'coverage'} onClick={() => setViewMode('coverage')} icon={<Activity size={14} />} label="COVERAGE" desc="Observed vs Unseen" />
           </div>
         </div>
       </div>

@@ -21,6 +21,11 @@ export const getReconstructStatus = async (jobId: string) => {
   return res.data;
 };
 
+export const getWorld = async (worldId: string) => {
+  const res = await apiClient.get(`/world/${worldId}`);
+  return res.data;
+};
+
 export const getWorldScene = async (worldId: string) => {
   const res = await apiClient.get(`/world/${worldId}/scene`);
   return res.data;

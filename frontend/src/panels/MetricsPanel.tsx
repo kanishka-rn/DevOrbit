@@ -2,7 +2,9 @@ import { useWorldStore } from '../stores/useWorldStore';
 import { X, BarChart2 } from 'lucide-react';
 
 export const MetricsPanel = () => {
-  const { setActivePanel } = useWorldStore();
+  const { setActivePanel, worldMetrics, worldCoverage } = useWorldStore();
+
+  if (!worldMetrics || !worldCoverage) return null;
 
   return (
     <div className="flex flex-col h-full">
@@ -18,8 +20,8 @@ export const MetricsPanel = () => {
 
       <div className="p-4 space-y-6 flex-1 overflow-y-auto">
         <div className="grid grid-cols-2 gap-4">
-          <MetricCard label="Frames" value="84" />
-          <MetricCard label="Keyframes" value="18" />
+          <MetricCard label="Frames" value={worldMetrics.frames} />
+          <MetricCard label="Keyframes" value={worldMetrics.keyframes} />
         </div>
 
         <div>
@@ -28,29 +30,43 @@ export const MetricsPanel = () => {
             <div className="space-y-1">
               <div className="flex justify-between text-xs">
                 <span className="text-emerald-400">Observed</span>
-                <span className="text-neutral-300">71%</span>
+                <span className="text-neutral-300">{Math.round(worldCoverage.observed * 100)}%</span>
               </div>
               <div className="h-1.5 w-full bg-neutral-900 rounded-full overflow-hidden">
-                <div className="h-full bg-emerald-500 w-[71%]"></div>
+                <div className="h-full bg-emerald-500" style={{ width: `${worldCoverage.observed * 100}%` }}></div>
               </div>
             </div>
+
+            {worldCoverage.unseen > 0 && (
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs">
+                  <span className="text-neutral-400">Unseen</span>
+                  <span className="text-neutral-300">{Math.round(worldCoverage.unseen * 100)}%</span>
+                </div>
+                <div className="h-1.5 w-full bg-neutral-900 rounded-full overflow-hidden">
+                  <div className="h-full bg-neutral-600" style={{ width: `${worldCoverage.unseen * 100}%` }}></div>
+                </div>
+              </div>
+            )}
             
-            <div className="space-y-1">
-              <div className="flex justify-between text-xs">
-                <span className="text-amber-400">Generated</span>
-                <span className="text-neutral-300">29%</span>
+            {worldCoverage.generated > 0 && (
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs">
+                  <span className="text-amber-400">Generated</span>
+                  <span className="text-neutral-300">{Math.round(worldCoverage.generated * 100)}%</span>
+                </div>
+                <div className="h-1.5 w-full bg-neutral-900 rounded-full overflow-hidden">
+                  <div className="h-full bg-amber-500" style={{ width: `${worldCoverage.generated * 100}%` }}></div>
+                </div>
               </div>
-              <div className="h-1.5 w-full bg-neutral-900 rounded-full overflow-hidden">
-                <div className="h-full bg-amber-500 w-[29%]"></div>
-              </div>
-            </div>
+            )}
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <MetricCard label="Points" value="150,000" />
-          <MetricCard label="Triangles" value="50,000" />
-          <MetricCard label="Validation Score" value="92/100" />
+          <MetricCard label="Points" value={(worldMetrics.points/1000).toFixed(0) + 'k'} />
+          <MetricCard label="Triangles" value={(worldMetrics.triangles/1000).toFixed(0) + 'k'} />
+          <MetricCard label="Validation Score" value={`${worldMetrics.validation_score}/100`} />
           <MetricCard label="Processing Time" value="4.2s" />
         </div>
       </div>

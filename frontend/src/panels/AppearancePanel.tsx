@@ -1,14 +1,42 @@
 import { useState } from 'react';
 import { useWorldStore } from '../stores/useWorldStore';
 import { X, Send, Palette } from 'lucide-react';
+import { editWorldAppearance, getWorld } from '../api/client';
 
 export const AppearancePanel = () => {
-  const { setActivePanel } = useWorldStore();
+  const { setActivePanel, worldId, setWorldData, versions } = useWorldStore();
   const [prompt, setPrompt] = useState('');
   
-  const handleApply = () => {
-    if(!prompt) return;
-    console.log("Applying edit:", prompt);
+  const handleApply = async () => {
+    if(!prompt || !worldId) return;
+    
+    // Simple mock NLP parsing
+    let target = 'walls';
+    if(prompt.toLowerCase().includes('sofa')) target = 'sofa';
+    if(prompt.toLowerCase().includes('floor')) target = 'floor';
+    
+    // Extract color
+    const colors = ['cream', 'green', 'blue', 'red', 'dark', 'white', '#F2E8D5', '#214A3A'];
+    let val = '#ffffff';
+    for (const c of colors) {
+      if (prompt.toLowerCase().includes(c)) {
+        if(c === 'cream') val = '#F2E8D5';
+        else if(c === 'green') val = '#22c55e';
+        else if(c === 'dark') val = '#1a1a1a';
+        else val = c;
+        break;
+      }
+    }
+
+    const editReq = {
+      target: target,
+      property: 'color',
+      value: val
+    };
+
+    await editWorldAppearance(worldId, editReq);
+    const data = await getWorld(worldId);
+    setWorldData(data);
     setPrompt('');
   };
 
@@ -28,12 +56,10 @@ export const AppearancePanel = () => {
         <div>
           <div className="text-[10px] font-semibold text-neutral-500 tracking-widest mb-3">THEMES</div>
           <div className="grid grid-cols-2 gap-2">
-            <ThemeButton label="Original" />
+            <ThemeButton label="Original" active />
             <ThemeButton label="Minimal White" />
-            <ThemeButton label="Dark Modern" active />
+            <ThemeButton label="Dark Modern" />
             <ThemeButton label="Natural" />
-            <ThemeButton label="Cool Blue" />
-            <ThemeButton label="Professional" />
           </div>
         </div>
 
@@ -59,18 +85,12 @@ export const AppearancePanel = () => {
         <div>
           <div className="text-[10px] font-semibold text-neutral-500 tracking-widest mb-3">WORLD VERSIONS</div>
           <div className="space-y-2">
-            <div className="p-2 bg-neutral-800/50 rounded text-xs text-neutral-300 flex justify-between items-center border border-neutral-700 cursor-pointer">
-              <span>WORLD v3 (Active)</span>
-              <span className="text-[10px] text-emerald-500">Current</span>
-            </div>
-            <div className="p-2 bg-neutral-900/50 hover:bg-neutral-800/50 rounded text-xs text-neutral-400 flex justify-between items-center cursor-pointer">
-              <span>WORLD v2 (Completed)</span>
-              <span className="text-[10px]">Restore</span>
-            </div>
-            <div className="p-2 bg-neutral-900/50 hover:bg-neutral-800/50 rounded text-xs text-neutral-400 flex justify-between items-center cursor-pointer">
-              <span>WORLD v1 (Original)</span>
-              <span className="text-[10px]">Restore</span>
-            </div>
+            {versions.slice().reverse().map((v: string, idx: number) => (
+              <div key={v} className={`p-2 rounded text-xs flex justify-between items-center cursor-pointer ${idx === 0 ? 'bg-neutral-800/50 text-neutral-300 border border-neutral-700' : 'bg-neutral-900/50 hover:bg-neutral-800/50 text-neutral-400'}`}>
+                <span>WORLD {v} {idx === 0 && '(Active)'}</span>
+                {idx === 0 ? <span className="text-[10px] text-emerald-500">Current</span> : <span className="text-[10px]">Restore</span>}
+              </div>
+            ))}
           </div>
         </div>
       </div>
